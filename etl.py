@@ -5,7 +5,7 @@ import glob
 
 def main():
     # Define paths
-    DATA_DIR = 'datos'
+    DATA_DIR = 'data/raw_data' # Directory containing XML files
     
     # Lists to store data
     athletes_data = []
