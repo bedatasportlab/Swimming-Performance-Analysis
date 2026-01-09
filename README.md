@@ -1,0 +1,2 @@
+# Swimming-Performance-Analysis
+Proyecto ETL: Análisis de Rendimiento en Natación (2021-2024). Pipeline completo de extracción, transformación y carga (ETL) sobre datos de 20 competiciones oficiales de OMEGA entre ciclos olímpicos. Incluye limpieza de datos, ingeniería de características y visualización de insights deportivos usando Python y Quarto.
