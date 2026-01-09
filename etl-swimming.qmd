@@ -226,5 +226,5 @@ Tras la exploración inicial de los datos, procedemos a la fase de pre-procesami
 - Insights relevates
 - Posibles extensiones del estudio
 
-# Guardado de Datos
-- Exportación de resultados
+# Carga de Datos
+- Exportación y guardado de resultados 
