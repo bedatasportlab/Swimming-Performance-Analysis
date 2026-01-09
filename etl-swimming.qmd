@@ -1,0 +1,230 @@
+---
+title: "Análisis ETL: Ciclo Olímpico 2021-2024 en Natación"
+author:
+  - Alonso González Romero
+  - Daniel López Paredes
+  - Alba Martínez de la Hermosa
+date: today
+format:
+  html:
+    page-layout: full  
+    css: style.css
+    embed-resources: true
+    plotly-connected: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+lang: es
+---
+
+# Introducción {#introduccion}
+- Descripción del tema elegido
+- Fuentes de datos
+- Objetivos del análisis
+
+Este proyecto presenta un flujo de trabajo ETL (Extract, Transform, Load) aplicado a datos oficiales de competiciones internacionales de natación entre 2021 y 2024. La **fuente de datos** proviene de los registros oficiales de [Omega Timing](https://www.omegatiming.com/), que proporciona a través de archivos XML información referente a múltiples competiciones de nivel internacional (Europeos, Mundiales, Trials Americanos, TYR Pro Swim Series, entre otros).
+
+El **objetivo principal** del análisis es transformar los datos crudos en información procesable que permita responder preguntas clave sobre el rendimiento de los nadadores, tendencias temporales y comparativas entre diferentes competiciones y categorías.
+
+
+*sección modificable acorde al desarrollo mismo del proyecto*
+
+# Organización y Gestión del Proyecto
+- Organización del Equipo
+- Gestión de código
+- Funciones desarrolladas
+
+*sección a completar tras el desarrollo del proyecto*
+
+# Extracción de Datos
+
+## Importación de fuente de datos
+
+Como bien se ha adelantado en la sección Introducción, los datos han sido extraídos de los archivos XML oficiales proporcionados por Omega Timing. Tras un proceso previo de scraping y parseo de archivos XML, hemos consolidado la información en cuatro archivos CSV que conforman nuestra base de datos relacional:
+
+- `competiciones.csv`: Información sobre las competiciones cargadas.
+- `atletas.csv`: Detalles de los nadadores.
+- `clubes.csv`: Datos de los clubes/países.
+- `resultados.csv`: Resultados de las competiciones nadadas.
+
+A continuación, procedemos a la carga de estos archivos en el entorno de trabajo utilizando la librería `pandas` de Python y un manejo básico de errores para asegurar que los archivos se cargan correctamente:
+
+```{python}
+import pandas as pd
+import os
+
+path_atletas = 'atletas.csv'
+path_clubes = 'clubes.csv'
+path_competiciones = 'competiciones.csv'
+path_resultados = 'resultados.csv'
+
+# Carga de DataFrames
+try:
+    df_atletas = pd.read_csv(path_atletas)
+    df_clubes = pd.read_csv(path_clubes)
+    df_competiciones = pd.read_csv(path_competiciones)
+    df_resultados = pd.read_csv(path_resultados)
+    
+    print("Todos los archivos se han cargados correctamente.")
+except FileNotFoundError as e:
+    print(f"Error de carga: {e}")
+
+# Eliminamos las rutas de los archivos para no sobrecargar el entorno
+del path_atletas, path_clubes, path_competiciones, path_resultados
+```
+
+## Exploración inicial
+
+Una vez cargados los datos, realizamos una exploración inicial de cada DataFrame para entender su estructura, los tipos de datos y la integridad de los identificadores. Para sistematizar este proceso de exploración, hemos desarrollado las siguientes funciones: 
+
+- `explorar_estructura(df, nombre_df, filas=3)`: Muestra las dimensiones, tipos de datos y un ejemplo de las primeras N filas de la tabla. Si no se especifica la última variable, se muestran las primeras 3 filas por defecto.
+
+- `verificar_unicidad(df, col_id)`: Verifica si una columna específica actúa como identificador único (Clave Primaria).
+
+```{python}
+def explorar_estructura(df, nombre_df, filas=3):
+    """
+    Datos de entrada:
+    - df: DataFrame a explorar.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+    - filas: Número de filas a mostrar del DataFrame. (Integer, default=3)
+
+    Funcionalidad:
+    Muestra las dimensiones, tipos de datos y un ejemplo de las primeras filas.
+    """
+    print(f"### Estructura del dataset: {nombre_df}")
+    print(f"Dimensiones: {df.shape[0]} filas x {df.shape[1]} columnas")
+    
+    # Creamos un resumen rápido de tipos
+    print("\n--- Tipos de datos ---")
+    print(df.dtypes)
+
+    print(f"\n--- Primeras {filas} filas de {nombre_df} ---")
+    display(df.head(filas))
+    print("\n" + "="*50 + "\n")
+
+def verificar_unicidad(df, col_id):
+    """
+    Datos de entrada:
+    - df: DataFrame a explorar.
+    - col_id: Nombre de la columna a verificar como identificador único. (String)
+
+    Funcionalidad:
+    Verifica si una columna específica actúa como identificador único para esa tabla.
+    """
+    print(f"Verificando identificador '{col_id}':")
+    
+    try:
+        serie = df[col_id]
+        if serie.is_unique:
+            print(f"La columna '{col_id}' es un identificador único en el DataFrame.")
+        else:
+            total = len(df)
+            unicos = serie.nunique()
+            print(f"La columna '{col_id}' NO es un identificador único. Tiene {unicos} valores únicos de {total} registros.")
+
+    except KeyError:
+        print(f"ERROR DE ACCESO: La columna '{col_id}' no existe en el DataFrame.")
+        
+    except Exception as e:
+        # Captura cualquier otro error inesperado (por ejemplo, dataframe corrupto)
+        print(f"ERROR INESPERADO: {e}")
+
+    finally:
+        # El bloque finally se ejecuta SIEMPRE, haya error o no. Ideal para formato.
+        print("-" * 30)
+
+```
+
+### Atletas
+
+Comenzamos con el DataFrame `df_atletas`, que contiene información sobre los nadadores. Analizamos primeramente su estructura:
+
+```{python}
+explorar_estructura(df_atletas, 'ID', filas=5)
+```
+
+Se puede observar que el DataFrame `df_atletas` tiene 4,700 filas y 5 columnas. Para cada nadador, se registra su identificador (`ID`), su nombre (`NOMBRE`), sus apellidos (`APELLIDOS`), su fecha de nacimiento (`birthday`) y su género (`género`).
+
+Verificamos si la columna `ID` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_atletas, 'ID')
+```
+
+
+Por lo tanto, podemos concluir que en el DataFrame `df_atletas`, la columna `ID` actúa como clave primaria y no hay errores en la carga. 
+
+### Clubes
+
+Procedemos de manera similar con el Dataframe `df_clubes`, que contiene información sobre los clubes o países a los que pertenecen los nadadores. 
+
+```{python}
+explorar_estructura(df_clubes, 'Clubes')
+```
+
+El DataFrame `df_clubes` tiene 1013 filas y 3 columnas. Cada registro contiene el identificador del club (`club_code`), el nombre del club o país (`club_name`) y su código internacional (`club_nation`). Podemos observar que los club_code y club_nation contienen el nombre con 3 letras del país. 
+
+Verificamos si la columna `club_code` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_clubes, 'club_code')
+```
+
+Por lo tanto, podemos concluir que en el DataFrame `df_clubes`, la columna `club_code` actúa como clave primaria y no hay errores en la carga.
+
+### Competiciones
+
+Procedemos de manera similar con el Dataframe `df_competiciones`, que contiene información sobre las competiciones de natación.
+
+```{python}
+explorar_estructura(df_competiciones, 'Competiciones')
+```
+
+El DataFrame `df_competiciones` tiene 21 filas y 9 columnas. Cada registro contiene el identificador de la competición (`ID`), el nombre de la competición (`nombre`), la ciudad donde se celebró (`ciudad`), el tipo de piscina (`tipo_piscina`), el país (`pais`) y las fechas de inicio y fin (`fecha_inicio`, `fecha_fin`), el tipo de cronometraje (`cronometraje`) y el número de calles (`numeroCalles`).
+
+Verificamos si la columna `ID` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_competiciones, 'ID')
+```
+
+Por lo tanto, podemos concluir que en el DataFrame `df_competiciones`, la columna `ID` actúa como clave primaria y no hay errores en la carga.
+
+
+### Resultados
+
+Procedemos de manera similar con el Dataframe `df_resultados`, que contiene información sobre los resultados de las competiciones.
+
+```{python}
+explorar_estructura(df_resultados, 'Resultados', 5)
+```
+
+Se observa que el DataFrame `df_resultados` tiene 179696 filas y 13 columnas. Cada registro contiene variables significantes para los resultados como el identificador de la competición (`id_competicion`), el identificador del nadador (`id_atleta`), el identificador del club o país (`club_code`), y datos sobre la prueba nadada, la ronda, el tiempo realizado, la fecha y hora a la que nadó, entre otros. Cabe destacar el formato en el que se presentan los resultados, ya que, por cada parcial que nadó el nadaor, se genera un registro independiente en el DataFrame. Es por ello que, como se puede observar, las 2 primeras filas del DataFrame corresponden al resultado del nadador con id 16422 en el 100 BREAST de la ronda PRE, donde la primera fila contiene información sobre el paso por el primer parcial (50m) y la segunda fila contiene el tiempo acumulado en el paso por el segundo y último parcial (100m). 
+
+# Pre-procesamiento
+
+Tras la exploración inicial de los datos, procedemos a la fase de pre-procesamiento, donde vamos a realizar las siguientes tareas: 
+
+- Tratamiento de tipos de datos en las columnas
+- Manejo de valores nulos
+- Transformación de fechas
+- Transformaciones de texto
+- Creación de variables derivadas
+
+# Procesamiento y Análisis
+- Operaciones de join
+- Operaciones de group by
+- Cálculo de métricas
+
+# Análisis y Visualizaciones
+- Preguntas con visualizaciones (+3)
+- Preguntas directas (+3)
+
+# Conclusiones
+- Hallazgos principales
+- Insights relevates
+- Posibles extensiones del estudio
+
+# Guardado de Datos
+- Exportación de resultados
