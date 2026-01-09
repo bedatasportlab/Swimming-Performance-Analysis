@@ -1,0 +1,1014 @@
+club_code,club_name,club_nation
+AFG,Afghanistan,AFG
+ALB,Albania,ALB
+ALG,Algeria,ALG
+AND,Andorra,AND
+ANG,Angola,ANG
+ANT,Antigua and Barbuda,ANT
+ARG,Argentina,ARG
+ARM,Armenia,ARM
+ART,AQUA Refugee Team,AQU
+ARU,Aruba,ARU
+ASA,American Samoa,ASA
+AUS,Australia,AUS
+AUT,Austria,AUT
+AZE,Azerbaijan,AZE
+BAH,Bahamas,BAH
+BAN,Bangladesh,BAN
+BAR,Barbados,BAR
+BDI,Burundi,BDI
+BEL,Belgium,BEL
+BEN,Benin,BEN
+BER,Bermuda,BER
+BHU,Bhutan,BHU
+BIH,Bosnia & Herzegovina,BIH
+BOL,Bolivia,BOL
+BOT,Botswana,BOT
+BRA,Brazil,BRA
+BRN,Bahrain,BRN
+BRU,Brunei Darussalam,BRU
+BUL,Bulgaria,BUL
+BUR,Burkina Faso,BUR
+CAF,Centr Afric Rep,CAF
+CAM,Cambodia,CAM
+CAN,Canada,CAN
+CAY,Cayman Islands,CAY
+CGO,Congo,CGO
+CHI,Chile,CHI
+CHN,China,CHN
+CIV,Côte d'Ivoire,CIV
+CMR,Cameroon,CMR
+COD,DR Congo,COD
+COK,Cook Islands,COK
+COL,Colombia,COL
+COM,Comoros,COM
+CPV,Cabo Verde,CPV
+CRC,Costa Rica,CRC
+CRO,Croatia,CRO
+CUB,Cuba,CUB
+CUR,Curacao,CUR
+CYP,Cyprus,CYP
+CZE,Czechia,CZE
+DEN,Denmark,DEN
+DJI,Djibouti,DJI
+DMA,Dominica,DMA
+DOM,Dominican Republic,DOM
+ECU,Ecuador,ECU
+EGY,Egypt,EGY
+ERI,Eritrea,ERI
+ESA,El Salvador,ESA
+ESP,Spain,ESP
+EST,Estonia,EST
+ETH,Ethiopia,ETH
+FIJ,Fiji,FIJ
+FIN,Finland,FIN
+FRA,France,FRA
+FRO,Faroe Islands,FRO
+FSM,Micronesia,FSM
+GAB,Gabon,GAB
+GAM,Gambia,GAM
+GBR,Great Britain,GBR
+GBS,Guinea-Bissau,GBS
+GEO,Georgia,GEO
+GEQ,Equatorial Guinea,GEQ
+GER,Germany,GER
+GHA,Ghana,GHA
+GRE,Greece,GRE
+GRN,Grenada,GRN
+GUA,Guatemala,GUA
+GUI,Guinea,GUI
+GUM,Guam,GUM
+GUY,Guyana,GUY
+HAI,Haiti,HAI
+HKG,"Hong Kong, China",HKG
+HON,Honduras,HON
+HUN,Hungary,HUN
+INA,Indonesia,INA
+IND,India,IND
+IRI,IR Iran,IRI
+IRL,Ireland,IRL
+IRQ,Iraq,IRQ
+ISL,Iceland,ISL
+ISR,Israel,ISR
+ISV,"Virgin Islands, US",ISV
+ITA,Italy,ITA
+JAM,Jamaica,JAM
+JOR,Jordan,JOR
+JPN,Japan,JPN
+KAZ,Kazakhstan,KAZ
+KEN,Kenya,KEN
+KGZ,Kyrgyzstan,KGZ
+KOR,Korea,KOR
+KOS,Kosovo,KOS
+KSA,Saudi Arabia,KSA
+KUW,Kuwait,KUW
+LAO,Lao PDR,LAO
+LAT,Latvia,LAT
+LBA,Libya,LBA
+LBN,Lebanon,LBN
+LCA,Saint Lucia,LCA
+LES,Lesotho,LES
+LTU,Lithuania,LTU
+LUX,Luxembourg,LUX
+MAA,Sint Maarten,MAA
+MAC,"Macau, China",
+MAD,Madagascar,MAD
+MAR,Morocco,MAR
+MAS,Malaysia,MAS
+MAW,Malawi,MAW
+MDA,Republic of Moldova,MDA
+MDV,Maldives,MDV
+MEX,Mexico,MEX
+MGL,Mongolia,MGL
+MHL,Marshall Islands,MHL
+MKD,North Macedonia,MKD
+MLI,Mali,MLI
+MNE,Montenegro,MNE
+MON,Monaco,MON
+MOZ,Mozambique,MOZ
+MRI,Mauritius,MRI
+MTN,Mauritania,MTN
+NAM,Namibia,NAM
+NCA,Nicaragua,NCA
+NED,Netherlands,NED
+NEP,Nepal,NEP
+NGR,Nigeria,NGR
+NIA,NIA,AQU
+NIG,Niger,NIG
+NMA,Northern Mariana Islands,NMA
+NOR,Norway,NOR
+NZL,New Zealand,NZL
+OMA,Oman,OMA
+PAK,Pakistan,PAK
+PAN,Panama,PAN
+PAR,Paraguay,PAR
+PER,Peru,PER
+PHI,Philippines,PHI
+PLE,Palestine,PLE
+PLW,Palau,PLW
+PNG,Papua New Guinea,PNG
+POL,Poland,POL
+POR,Portugal,POR
+PUR,Puerto Rico,PUR
+QAT,Qatar,QAT
+ROU,Romania,ROU
+RSA,South Africa,RSA
+RUS,Russian Federation,RUS
+RWA,Rwanda,RWA
+SAM,Samoa,SAM
+SEN,Senegal,SEN
+SEY,Seychelles,SEY
+SGP,Singapore,SGP
+SKN,St Kitts and Nevis,SKN
+SLE,Sierra Leone,SLE
+SLO,Slovenia,SLO
+SMR,San Marino,SMR
+SOL,Solomon Islands,SOL
+SRB,Serbia,SRB
+SRI,Sri Lanka,SRI
+STP,Sao Tome & Principe,STP
+SUD,Sudan,SUD
+SUI,Switzerland,SUI
+SUR,Suriname,SUR
+SVK,Slovakia,SVK
+SWE,Sweden,SWE
+SWZ,Eswatini,SWZ
+SYR,Syria,SYR
+TAN,Tanzania,TAN
+TCN,Turks and Caicos Islands,TCN
+TGA,Tonga,TGA
+THA,Thailand,THA
+TJK,Tajikistan,TJK
+TKM,Turkmenistan,TKM
+TLS,Timor-Leste,TLS
+TOG,Togo,TOG
+TPE,Chinese Taipei,TPE
+TTO,Trinidad and Tobago,TTO
+TUN,Tunisia,TUN
+TUR,Türkiye,TUR
+UAE,UA Emirates,UAE
+UGA,Uganda,UGA
+UKR,Ukraine,UKR
+URU,Uruguay,URU
+USA,United States,USA
+UZB,Uzbekistan,UZB
+VAN,Vanuatu,VAN
+VEN,Venezuela,VEN
+VIE,Vietnam,VIE
+VIN,StVincent&Grenadines,VIN
+YEM,Yemen,YEM
+ZAM,Zambia,ZAM
+ZIM,Zimbabwe,ZIM
+AAC,Arlington Aquatic Club,USA
+ABSC,Athens Bulldog Swim Club,USA
+ACAD,Academy Bullets Swim Club,USA
+AGS,Aggie Swim Club,USA
+AGUA,Asphalt Green Unified Aquatics,USA
+ALPH,Alpha Aquatics,USA
+ALTO,Alto Swim Club,USA
+ASC,Annapolis Swim Club,USA
+AU,American University,USA
+BASS,Battlefield Area Star Swimmers,USA
+BBST,Bellingham Bay Swim Team,USA
+BHA,Blue Hen Aquatics,USA
+BRY,Blair Regional YMCA,USA
+BSS,Bolles School Sharks,USA
+BULL,Bulldog Swimming,USA
+BYU,Brigham Young University Swim,USA
+CAL,California Aquatics,USA
+CANE,Hurricane Aquatics,USA
+CARD,Cardinal Aquatics,USA
+CASC,Cascade Swim Club,USA
+CA-Y,Cavalier Aquatics-Piedmont Fam,USA
+CLPR,Northern KY Clippers Swimming,USA
+CNM,Cercle des Nageurs de Marseill,USA
+COR,COR Swimming,USA
+CPAC,Chelsea Piers Aquatic Club,USA
+CUY,YMCA of Cumberland,USA
+CW,Club Wolverine,USA
+DART,DART Swimming,USA
+DM,Dallas Mustangs,USA
+DYNA,Dynamo Swim Club,USA
+EA,Eagle Aquatics,USA
+ESC,Eagle Swim Club,USA
+FAA,Florida Atlantic Aquatics,USA
+FASTFL,Fast Falcons,USA
+FASTIN,Fishers Area Swimming Tigers,USA
+FISH,The Fish,USA
+FLOR,University of Florida,USA
+FOX,Fox Valley Swim Team,USA
+FOXJ,Foxjets Swim Team,USA
+GMU,George Mason University,USA
+GPAC,Greater Pensacola Aquatic Club,USA
+GSC-FL,Gator Swim Club,USA
+GSCY,Greater Somerset County YMCA S,USA
+HAWG,Razorback Aquatic Club Aquahaw,USA
+HAWK,Seahawk Aquatics,USA
+HHSC,Highland Hurricanes Swim Club,USA
+HOKI,H2okie Aquatics,USA
+HRA,Highlands Ranch Aquatics,USA
+IFLY,Iowa Flyers Swim Club,USA
+ISC,Indiana Swim Club,USA
+IU,Indiana University,USA
+JAC,Jersey Aquatic Club,USA
+JAGS,Jaguar Aquatics,USA
+KA,Keystone Aquatics,USA
+KING,King Aquatic Club,USA
+LAKR,Laker Swim,USA
+LESD,Lake Erie Silver Dolphins,USA
+LIAC,Long Island Aquatic Club,USA
+LMOR,Lower Moreland Swimming,USA
+LOSC,Langley Olympians Swim Club,USA
+LSU,Louisiana State University,USA
+MAAC,Metro Atlanta Aquatic Club,USA
+MAC-NC,SwimMAC Carolina,USA
+MAKO,Mason Makos Swim Team,USA
+MASA,MA Swim Academy,USA
+MIA,University Of Miami Hurricanes,USA
+MICH,University of Michigan,USA
+MMST,Mississippi Makos Swim Team,USA
+MOR,Marlins Of Raleigh,USA
+MSA,Mecklenburg Swim Association,USA
+MTC,Minas TÃªnis Club,USA
+MTRO,Metroplex Aquatics,USA
+MTS,Memphis Tiger Swimming,USA
+MVAC,Montverde Aquatic Club,USA
+MVN,Mission Viejo Nadadores,USA
+NAC,Nashville Aquatic Club,USA
+NCAP,Nation's Capital Swim Club,USA
+NCS,NC State University,USA
+ND,University Of Notre Dame,USA
+NOVA,Nova of Virginia,USA
+NSEA,NSEA Swim,USA
+NU,Northwestern University ST,USA
+NYAC,New York Athletic Club,USA
+OLY,OLY Swimming,USA
+OSHY,Oshkosh YMCA Dolphin Swim Team,USA
+OSU,Ohio State University,USA
+PAA,Peddie Aquatic Association,USA
+PARA,Para A Team,USA
+PEAQ,Team Pittsburgh Elite Aquatics,USA
+PITT,University of Pittsburgh,USA
+PLS,Pleasanton Seahawks,USA
+PPA,Pikes Peak Athletics,USA
+PRVT,Pinnacle Racing,USA
+PSDN,Poseidon Swimming Inc,USA
+QSTS,Quest Swimming,USA
+QU,Queens University,USA
+RAC,Ridgefield Aquatic Club,USA
+RAYS,Mason Manta Rays,USA
+RMSC,Rockville Montgomery Swim Club,USA
+SA,SwimAtlanta,USA
+SABA,Club Sabadell,USA
+SAC,Scottsdale Aquatic Club,USA
+SAND,Sandpipers Of Nevada,USA
+SASA,Streamline Aquatics,USA
+SGSA,Swim GSA,USA
+SHAC,Swim Houston Aquatics Center,USA
+SOFL,South Florida Aquatic Club,USA
+SPAC,Spartan Aquatic Club,USA
+SPA-FL,Saint Petersburg Aquatics,USA
+SSC,Suburban Seahawks Club,USA
+SSTY,Schroeder YMCA Swim Team,USA
+STSC,Seward Tsunami Swim Club,USA
+SUN,Sun Devil Swimming,USA
+SYS,Sarasota Sharks,USA
+TAC,TAC Titans,USA
+TAMU,Texas A & M University,USA
+TEAM,Team Charlotte Swimming,USA
+TENN,University Of Tennessee,USA
+TEX,University of Texas,USA
+TFA,Texas Ford Aquatics,USA
+TG,Team Greenville,USA
+TNAQ,Tennessee Aquatics,USA
+TOC,The Olympic Club,USA
+TOPS,Univ of Denver Hilltoppers,USA
+TQ,Team QuÃ©bec,USA
+TRI,Team Triumph,USA
+TRIB,Tribe Aquatics,USA
+TROJ,Trojan Swim Club,USA
+TST-CA,The Swim Team,USA
+TST-MV,Tsunami Swim Team of KC,USA
+TXLA,Longhorn Aquatics,USA
+UCLA,UCLA Swimming,USA
+UK,Univeristy of Kentucky,USA
+UMLY,Upper Main Line YMCA,USA
+UN-AZ,Unattached Sun Devil,USA
+UNC,University Of North Carolina,USA
+UN-CA,Unattached - Trojan,USA
+UNCB,University of Northern Colorad,USA
+UN-CO,Unattached,USA
+UN-CT,Unattached Greenwich Y,USA
+UN-FG,Unattached - Swim FtLauderdale,USA
+UN-FL,Unattached,USA
+UN-GA,Unattached Georgia,USA
+UN-IL,Unattached,USA
+UN-IN,Unattached,USA
+UN-KY,Unattached,USA
+UN-MA,Unattached,USA
+UN-MI,Unattached,USA
+UN-MN,Unattached Foxjets,USA
+UN-MR,Unattached,USA
+UN-NC,Unattached,USA
+UN-NE,Unattached,USA
+UN-NT,Unattached,USA
+UN-OH,Unattached - RAYS,USA
+UN-PC,Unattached Cal Aquatics,USA
+UN-SC,Unattached,USA
+UN-US,Unattached Isreal,USA
+UN-UT,Unattached,USA
+UN-VA,Unattached,USA
+UN-WV,Unattached,USA
+UOFL,University of Louisville,USA
+UOFM,University of Minnesota,USA
+UOFS,University of Stirling,USA
+UPN,University of Pennsylvania,USA
+UTAH,Utah Aquatics,USA
+UTS,University of Toronto Swimming,USA
+UVA,University of  Virginia,USA
+UWYO,Wyoming Aquatics,USA
+VILL,Villanova,USA
+VSC,Valparaiso Swim Club,USA
+VT,Virginia Tech,USA
+WISC,Wisconsin Aquatics,USA
+WOLF,Wolfpack Elite,USA
+WOW,Waves Of Wilmington Inc,USA
+YOTA,YMCA of the Triangle Area Swim,USA
+ABF,Bluefish Swim Club,USA
+AQJT,Aquajets Swim Team,USA
+BAD,"Badger Swim Club,Inc.",USA
+BAMA,University Of Alabama Swim Clu,USA
+BC,Bellevue Club Swim Team,USA
+BCH,Boulder City Henderson Swim Te,USA
+BEND,Bend Swim Club,USA
+CCAC,Carpet Capital Aquatics Club,USA
+CFSC,Cypress Fairbanks Swim Club,USA
+CITI,Beach Cities Swimming,USA
+CLOV,Clovis Swim Club,USA
+COND,Condors Swim Club,USA
+COSA,Colorado Springs Area Swimming,USA
+CROW,Crow Canyon Sharks,USA
+CS,Commonwealth Swimming,USA
+CSC-IN,Carmel Swim Club,USA
+CSTE,Coronado Swim Association Team,USA
+DADS,Dads Club Swim Team,USA
+EBSC,Elmbrook Swim Club,USA
+ECA,East Carolina Aquatics,USA
+EDI,Edina Swim Club,USA
+EKC,Empire KC Swim Club,USA
+FASTCA,FAST Swim Team,USA
+FASTCO,Fort Collins Area Swim Team,USA
+FASTFG,Flood Aquatics Swim Team,USA
+GM,Gold Medal Swim Club,USA
+GTAC,Greater Toledo Aquatic Club,USA
+HURR,Columbus Aquatic Club,USA
+IA,Irish Aquatics,USA
+ISWM,iNspire Swim Team,USA
+JW,Jersey Wahoos,USA
+KYA,Kentucky Aquatics,USA
+LAC,Lakeside Aquatic Club,USA
+LAK,Lakeside Swim Team,USA
+LIFE,Lifetime Swim Team North Carol,USA
+LY,Lynchburg YMCA Swim Team,USA
+MWWM,Mid Wisconsin Wave Makers,USA
+NAAC,New Albany Aquatic Club,USA
+NBAC,North Baltimore Aquatic Club,USA
+NCAC,North Carolina Aquatic Club,USA
+NOVACA,Irvine Novaquatics,USA
+NOVAVA,"NOVA of Virginia Aquatics, Inc",USA
+NTN,North Texas Nadadores,USA
+NTRO,Nitro Swimming,USA
+PAY,Phoenixville  YMCA,USA
+PCS,Pine Crest Swimming,USA
+PSC,Phoenix Swim Club,USA
+QSS,Quicksilver Swimming,USA
+RATS,Indian River Aquatics,USA
+RMDA,La Mirada Armada,USA
+SCAR,Scarlet Aquatics,USA
+SCH,Sioux Center Seahawks,USA
+SCSCSC,South Carolina Swim Club,USA
+SMAC,Seattle Metropolitan Aquatic C,USA
+SOLO,SOLO Aquatics,USA
+SPA-AR,Springfield Aquatics,USA
+STAR,Colorado Stars,USA
+TAC-NC,TAC Titans,USA
+TAC-SI,Tritons Aquatic Club,USA
+TAQ,Tiger Aquatics Swim Club,USA
+TBAC,Tampa Bay Aquatic Club,USA
+TCA,Treasure Coast Aquatics,USA
+TCSC,Treasure Coast Swimming Conqui,USA
+TE,Team Elite,USA
+THSC,Tualatin Hills Swim Club,USA
+TIDEIL,Fox Valley Park District Ripti,USA
+TIDEVA,Tide Swimming,USA
+TNT,TNT Swimming,USA
+TS,Team Suffolk,USA
+TSM,Team Santa Monica,USA
+UMIZ,U. of Missouri,USA
+UN-HI,Unattached,USA
+UN-IE,Unattached,USA
+UN-MS,Unattached,USA
+UN-MV,Unattached,USA
+UN-NJ,Unattached,USA
+UN-ST,Unattached TXLA,USA
+UN-WI,Unattached WA,USA
+WA,Wisconsin Aquatics,USA
+WAVE,New Wave Swim Team,USA
+YSSC,Y-Spartaquatics Swim Club,USA
+ZSC,Zionsville Swim Club,USA
+FAR,Faroe Islands,FAR
+FRT,FINA Refugee Team,FRT
+ROC,ROC,ROC
+SMF,Suspended Member Federation,SMF
+AFA,Air Force Academy,USA
+ARMY,Army West Point,USA
+AU-PV,American University,USA
+AU-SE,Auburn University,USA
+AZTC,Aztec Aquatics,USA
+BA,Boilermaker Aquatics,USA
+BD,Blue Dolfins,USA
+CAC,Cincinnati Aquatic Club,USA
+CDST,California Dolphin Swim Team,USA
+CGBD,Coast Guard Blue Dolphins,USA
+CMSA,City of Mobile Swim Associatio,USA
+COLA,City Of Lafayette Aquatics,USA
+CWAC,Chicago Wolfpack Aquatic Club,USA
+DVSC,Dearne Valley Swimming Club,USA
+EAST,Empire Swimming,USA
+EVO,Evolution Racing Club,USA
+FASTLE,Firestone Akron Swim Team,USA
+FORD,Tucson Ford Dealers Aquatics,USA
+GW,George Washington Aquatics,USA
+HIGH,Highlander Aquatic Club,USA
+ICAC,Inland Coastal Aq Club,USA
+ITO,Itoman Toshin,USA
+JBST,J Barracudas Swim Team,USA
+KCB,Kansas City Blazers,USA
+LIB,Liberty Aquatics,USA
+LINS,"Marietta Marlins, Inc",USA
+LOMA,La Loma Queretaro,USA
+LSA,Lion Swim Academy,USA
+NFS,"North Florida Swimming, Inc.",USA
+PATH,Paseo Aquatics Swim Team,USA
+ROSE,Rose Bowl Aquatics,USA
+RXA,Racer X Aquatics,USA
+SAS,Saint Andrew's Aquatics,USA
+SCAL,SOCAL Aquatics Association,USA
+SDSA,San Diego Seaport Aquatics,USA
+SJAC,South Jersey Aquatic Club,USA
+SPAR,The Spartans of La Canada,USA
+TBAY,Tampa Bay  Aquatics,USA
+TRA,Team Rebel Aquatics,USA
+TST,The Swim Team,USA
+UCD,UCD AQUAMONSTERS,USA
+UCSB,Gaucho Aquatics,USA
+UN-MD,Unattached NAVY,USA
+UN-OR,Unattached,USA
+UN-SI,Unattached,USA
+VS,Veritas Swimming,USA
+WILD,NASA Wildcat Aquatics,USA
+WVU,West Virginia University,USA
+ZONA,Arizona Elite,USA
+AAAA,Alamo Area Aquatic Association,USA
+ABLY,M.E. Lyons/Anderson Barracudas,USA
+ACAC,Ames Cyclone Aquatics Club,USA
+AESC,American Energy Swim Club,USA
+AQUACO,Aquawolves Swimming,USA
+AQUAGU,Aquastar,USA
+ASC-MD,Annapolis Swim Club,USA
+ASC-ST,Austin Swim Club,USA
+ASL,Aiken-Augusta Swim League,USA
+ATOM,Aquatic Team Of Mecklenburg,USA
+AUL,Aulea Swim Club,USA
+AZFL,Azura Florida Aquatics,USA
+AZOT,Aquazot Swim Club,USA
+BAC,Burlingame Aquatic Club,USA
+BATS,Houston Bridge Bats,USA
+BAY,Baylor Swim Club,USA
+BBD,Birmingham 'Y' Blue Dolphins,USA
+BGNW,BGC-N. Westchester Marlins,USA
+BGSC,Gator Swim Club,USA
+BISC,Bainbridge Island Swim Club,USA
+BKYS,Buckeye Swim Club,USA
+BREA,Brea Aquatics,USA
+BSC-IL,Barrington Swim Club,USA
+BSC-SD,Brookings Swim Club,USA
+BSL,Birmingham Swim League,USA
+BTA,Blue Tide Aquatics,USA
+CGAC,Center Grove Aquatic Club,USA
+CHAT,Cottonwood Heights Aquatics,USA
+CIA,Central Iowa Aquatics,USA
+CM-OH,Cincinnati Marlins,USA
+CM-WV,Club Mountaineer Aquatics,USA
+CON,Concord Swim Club,USA
+COUG,Cougar Aquatics,USA
+CRIM,Crimson Aquatics,USA
+CSC-PN,Cascade Swim Club,USA
+CSC-UT,Cedar Swim Club,USA
+DA,Dolphin Aquatics,USA
+DACA,De Anza Cupertino Aquatics,USA
+DCST,Dublin Community Swim Team,USA
+DMSF,Des Moines Swimming Federation,USA
+DRGN,Red Dragon Swimming,USA
+DSA,Diamond State Aquatics,USA
+DYP,David YMCA Phantoms,USA
+ENSW,Ensworth Aquatics,USA
+FAC,Flatiron Athletic Club,USA
+FCST,"First Colony Swim Team, Inc.",USA
+FSON,Fusion Aquatics,USA
+FSPY,Fanwood-Scotch Plains YMCA,USA
+FST,Foothills Swim Team,USA
+GA,Gwinnett Aquatics,USA
+GAME,Gamecock Aquatics,USA
+GCAT,Georgia Coastal Aquatic Team,USA
+GCST,Greater Columbus Swim Tm Of Oh,USA
+GOAL,Greater Omaha Aquatics Leopard,USA
+GOLDGA,Chattahoochee Gold Swim Club,USA
+GOLDST,Texas Gold,USA
+GSC,Glenbrook Swim Club,USA
+GWSC,Golden West Swim Club,USA
+H2A,Hilton Head Aquatics,USA
+HAC,Hillsborough Aquatic Club,USA
+HEATIL,Champaign Cnty YMCA,USA
+HEATLE,Hudson Explorer Aquatic,USA
+HEATOR,Hillsboro Swim Team,USA
+HSC-IL,Hinsdale Swim Club,USA
+HSC-ST,Hays Swim Club,USA
+JFAC,Jersey Flyers Aquatic Club,USA
+KATY,Katy Aquatic Team For Youth,USA
+KMS,King Marlin Swim Club,USA
+LA,Loggerhead Aquatics,USA
+LAA,"Los Alamos Aquatomics, Inc",USA
+LAC-NT,Lakeside Aquatic Club,USA
+LAC-PC,Livermore Aqua Cowboys,USA
+LAKE,Lake Country Swim Team,USA
+LAN,Lander Swim Club,USA
+LASC,Los Angeles Swim Club,USA
+LIFENC,Lifetime Swim Team North Carol,USA
+LIFENJ,Metro Area Life Time,USA
+LKWD,Lakewood Aquatics,USA
+LOVE,Loveland Swim Club,USA
+LRAD,Arkansas Dolphins Swim Team,USA
+LSSC,Lake Shore Swim Club,USA
+MAC-GU,Magnolia Aquatic Club,USA
+MAC-MD,Monocacy Aquatic Club,USA
+MAC-OR,Multnomah Athletic Club,USA
+MAKOMN,Mako Aquatics,USA
+MAKOPC,South Valley Makos,USA
+MAST,Milford Area Swim Team,USA
+MAVS,Maverick Swim Club,USA
+MLAC,Mount Lebanon Aqua Club,USA
+MTAC,Memphis Thunder Aquatic Club,USA
+MTKA,Minnetonka Swim Club,USA
+NBA,North Bay Aquatics,USA
+NCY,New Canaan YMCA Caimans,USA
+NJBL,North Jersey Bluestreaks,USA
+NRG,NRG Swimming,USA
+NTA,New Trier Aquatics,USA
+OA,Olympus Aquatics,USA
+OAPB,Orinda Aquatics,USA
+OCA,Olympic Cascade Aquatics,USA
+OCSC,Oregon Community Swim Club,USA
+OSC,Otter Swim Club,USA
+OZ,Ozaukee Aquatics,USA
+PAC,Patriot Aquatic Club,USA
+PASA,Palo Alto Stanford Aquatics,USA
+PATS,Patriot Swim Team,USA
+PDSC,Palm Desert Swim Club,USA
+PHX,Phoenix Swimming,USA
+PPD,Palatine Park Dist Swim Team,USA
+PSC-AZ,Phoenix Swim Club,USA
+PSC-MA,Parkland Swimming Club,USA
+PS-FL,Pipeline Swimming,USA
+PS-SI,Pacific Swim,USA
+PST,Piedmont Swim Team,USA
+RA,Ripon Aquatics,USA
+RAA,Riverside Aquatics Association,USA
+RACE,Rockwall Aquatic Center of Exc,USA
+RAD,Radnor Aquatic Club,USA
+RICE,Rice Aquatics,USA
+RICH,Spider Swimming,USA
+RIPT,Riptide,USA
+RMSCIL,Rockford Marlins Swim Club,USA
+RMSCPV,Rockville Montgomery Swim Club,USA
+ROCO,Rocoa Rockets,USA
+RSC,Rochester Swim Club,USA
+RSD,Rancho San Dieguito,USA
+RYWC,Regional YMCA of Western Conne,USA
+SAY,Summit Area YMCA,USA
+SCAT,Southern Crescent Aquatic Team,USA
+SCHE,Schenectady-Saratoga Swim Club,USA
+SCSC,Santa Clara Swim Club,USA
+SCST,St Charles Swim Team,USA
+SDVL,Sea Devils,USA
+SEAL,Seal Beach Swim Club,USA
+SHRK,BLAST Sharks,USA
+SMACME,Southern Maine Aquatic Club,USA
+SMACPN,Seattle Metropolitan Aquatic C,USA
+SMST,Sierra Marlins Swim Team,USA
+SPY,Springfield Family YMCA,USA
+SRN,Neptune Swimming,USA
+SRQ,Sarasota Tsunami Swim Team,USA
+SSAC,Stamford Sailfish Aquatic Club,USA
+SSS,South Shore Sails,USA
+SST-GA,Savannah Swim Team,USA
+SST-GU,Spring Swim Team,USA
+STARFL,Southwest Stars Swim Club,USA
+STARNI,STAR Swimming,USA
+STRM,South Metro Storm,USA
+SVSC,Seneca Valley Swim Club,USA
+SWAQ,Swift Aquatics,USA
+SWAT,Spokane Waves Aquatic Team,USA
+SWIM,SwimStrongsville,USA
+T2,T2 Aquatics,USA
+TERA,Terrapins Swim Team,USA
+TIDEPC,Almaden Riptides,USA
+TORR,Swim Torrance,USA
+TRAC,Tyler Rose Aquatic Club,USA
+TWSTGU,The Woodlands Swim Team,USA
+TWSTNI,Town Wreckers Swim Team,USA
+UASC,Upper Arlington Swim Club,USA
+UN-AD,Unattached DELM,USA
+UN-SE,Unattached MTAC,USA
+UN-WT,Unattached,USA
+USSC,Utica Shelby Swim Club,USA
+WAC-MA,Wilmington Aquatic Club,USA
+WAC-SN,Wolverine Aquatics,USA
+WAKE,Wake Aquatics,USA
+WCAB,Walnut Creek Aquabears,USA
+WEST,Westchester Aquatic Club,USA
+WFY,Wyckoff YMCA,USA
+WLOO,Waterloo Swimming,USA
+WOR,Worthington Swim Club,USA
+WSC,Wichita Swim Club,USA
+WTSC,Washington Township Swim Club,USA
+WYN,Wichita YMCA Neptunes,USA
+XCELNJ,X-Cel Swimming,USA
+XCELSE,Excel Aquatics,USA
+YCV,YMCA of the Chippewa Valley Ba,USA
+YY,York YMCA,USA
+ZEUS,ZEUS Swim Team,USA
+ACES,University of  Evansvile,USA
+AQUA,Aquawolves Swim Team,USA
+ARIZ,University of Arizona,USA
+AZ PG,Univ of Arizona Post Grad,USA
+BRYU,Bryant University,USA
+BUCK,Bucknell University,USA
+CANC,Canisius College,USA
+CCSU,Central Connecticut State Univ,USA
+CLP,CLUB LIBANES POTOSINO,USA
+DR,Dayton Raiders Swim Club,USA
+DUKE,Duke University,USA
+DUQU,Duquesne University,USA
+EA-FG,Eagle Aquatics,USA
+EA-OK,Eagle Aquatics,USA
+EKSC,Edmonton Keyano Swim Club,USA
+FIU,Florida International Univ,USA
+GAAC,Germantown Academy Aquatic Clu,USA
+GATR,Virginia Gators of Harrisonbur,USA
+GATR$,Virginia Gators,USA
+GOLD,TEXAS GOLD SWIMMING,USA
+GTWN,Georgetown University,USA
+HAWA,"University of Hawaii, Manoa",USA
+HCST,Hope College Swim Team,USA
+ISU,Indiana State University,USA
+JCU,John Carroll University,USA
+LIBU,Liberty University,USA
+LOU,"Louisville, University of",USA
+MPAC,Mt Pleasant Aqua Club,USA
+NCA-CT,Northeast Connecticut Aquatics,USA
+NCA-SI,North Coast Aquatics,USA
+NKB,Nepean Kanata Barracudas,USA
+NSW,NSW Swim,USA
+OHIO,Ohio University,USA
+PC,Providence College,USA
+RCKT,Rockets,USA
+RSCA,Rockwood Swim Club,USA
+SCOT,Scottish Swimming,USA
+SESI,SESI-SP Swimming Team,USA
+SIU,Southern Illinois University,USA
+SRST,Stingray Swim Team,USA
+SST-IL,Sheridan Swim Team,USA
+STAN,Stanford University,USA
+TA&M,Texas A&M University,USA
+TIDE,Fox Valley Park District Ripti,USA
+TOWS,Towson University,USA
+TRIV,TRI VALLEY AQUATICS,USA
+TUL,Tulane University,USA
+TWST,Orchard Park Town Wreckers Swi,USA
+UARK,University of Arkansas,USA
+UCSD,UC San Diego,USA
+UKY,"Kentucky, University of",USA
+UN-LA,Unattached-LA,USA
+UN-OK,Unattached OK,USA
+VIR,The US Virgin Islands,USA
+W&M,William and Mary,USA
+XAV,Xavier University,USA
+YMCA,YMCA of Austin Swim Alliance,USA
+FMC,FMC Aquatic,USA
+PW,"Pulling Water, LLC",USA
+UN-PV,Unattached,USA
+UPHL,Swim Uphill,USA
+USAR,USA Resident Team,USA
+WAC,Westerville Aquatic Club,USA
+BBA,Atlantis Swimming,USA
+BSC,Baldwin Swim Club,USA
+CM,Cincinnati Marlins,USA
+CSC,Carmel Swim Club,USA
+DASH,Dubuque Area Swimmin' Hurrican,USA
+FAST,Fort Collins Area Swim Team,USA
+GSC-IL,Glenbrook Swim Club,USA
+GWU,George Washington Aquatics,USA
+KANS,Kansas Swimming,USA
+PEAK,Peak Swimming,USA
+RPC-KY,Race Pace Club,USA
+RPC-SI,MA Swim Academy,USA
+SPA,Springfield Aquatics,USA
+UN-GU,Unattached,USA
+UN-LE,Unattached,USA
+WASC,Westminster Academy Swim Club,USA
+YHF,YMCA Hub Fins,USA
+ACE,Aquatic Club of Elkhorn,USA
+CSUB,Cal State Univ - Bakersfield,USA
+DREX,Drexel Dragon Aquatics,USA
+ECP,Esporte Clube Pinheiros,USA
+FRES,Fresno State Swimming,USA
+GC,Granite Club,USA
+GTBY,Grand Traverse Bay YMCA Breake,USA
+GTCH,Georgia Tech Swimming,USA
+GWA,Great Waves Aquatics,USA
+HOSC,Hornet Age Group Swim Club,USA
+HSC,Hinsdale Swim Club,USA
+LGAC,Twisters Swim Club,USA
+LOYO,Loyola University Maryland,USA
+MAC-MW,Millard Aquatic Club,USA
+MAC-WI,Madison Aquatic Club,USA
+MSC,Munster Swim Club,USA
+MYST,McGaw YMCA Swim Team,USA
+NYS,New York Sharks Aquatics,USA
+PKWY,Parkway Swim Club,USA
+PX3,Pleasant Prairie Patriots Swim,USA
+RISE,RISE Aquatic Club,USA
+SCT,Scout Aquatics,USA
+SEA,Southeastern Aquatics,USA
+SFTL,Swim Fort Lauderdale,USA
+SFY,Summit Family YMCA Titans,USA
+SJC,San Juan Cariba,USA
+SW,Swim Wales,USA
+UN-CC,Unattached,USA
+UNEV,University of Nevada,USA
+UN-MW,Unattached U of Nebraska,USA
+UN-NI,Unattached,USA
+VU,Vanderbilt University,USA
+WESTMR,Westchester Aquatic Club,USA
+WESTWI,Waukesha Express Swim Team,USA
+AKRN,The University of Akron,USA
+AQUASN,AquaSol,USA
+BC-NE,Eagle Aquatics,USA
+BC-PN,Bellevue Club Swim Team,USA
+BNY,Waves Bloomington/Normal Y S.T,USA
+CA,Coast Aquatics,USA
+CAD,City Of Atlanta Dolphins,USA
+CANY,Canyons Aquatic Club,USA
+CATS,Bearcat Aquatics,USA
+CDOG,Cheshire Y Sea Dog  Swim Club,USA
+CLCK,"Jim Click Team Elite, Inc",USA
+CRAW,Crawfish Aquatics,USA
+CTA,Crimson Tide Aquatics,USA
+CVAC,Catawba Valley Aquatic Club,USA
+EMAC,Emmaus Aquatic Club,USA
+FINS,Fins Swim Team,USA
+FNM,Franklin & Marshall College,USA
+FORT,Fort Wayne Swim Team,USA
+FRST,Franklin Regional Swim Team,USA
+GMNY,YMCA of Greater Monmouth Count,USA
+GS,Greenwood Swimming,USA
+GSVY,Greater Susquehanna Valley YMC,USA
+GYWD,Greenwich YWCA Dolphins Swm Tm,USA
+HTSC,High Tides Swim Club,USA
+HUSK,Club Husker,USA
+IVDA,Imp. Valley Desert Aq,USA
+JDST,Jupiter Dragons Swim Team,USA
+KSC,Kamehameha Swim Club,USA
+LMST,Linn-Mar Swim Team,USA
+LRSC,Long Reach Swim Club,USA
+LSS,Lincoln Select Swimming,USA
+MAC-NT,Mansfield Aquatic Club,USA
+MHSW,Mercy Healthplex Sea Wolves,USA
+MLA,Michigan Lakeshore Aquatics,USA
+MSA-NC,Mecklenburg Swim Association,USA
+MSA-SE,Madison Swimming Association,USA
+MSU-MI,Michigan State University,USA
+MSU-MV,Missouri State University,USA
+NAVY,Navy Swimming,USA
+NLSA,Northern Lights Swimming Assoc,USA
+PRIN,Princeton University Swim Team,USA
+PS,Pipeline Swimming,USA
+PWAC,Plymouth Whitemarsh Aquatics,USA
+RA-CC,Roadrunner Aquatic,USA
+RACEKY,RACE Aquatics Swim Club,USA
+RACENT,Rockwall Aquatic Center of Exc,USA
+RA-WI,Rocket Aquatics,USA
+RIO,Rio Salado Swim Club,USA
+ROWA,Rowan University,USA
+RST,Rapids Swim Team,USA
+RYL,Royal Swim Team,USA
+SA-FL,Seminole Aquatics,USA
+SA-GA,SwimAtlanta,USA
+SALU,Saluki Swim Club,USA
+SMSC,Santa Maria Swim Club,USA
+SMU,Southern Methodist University,USA
+SSAN,Swim Streamline at Northampton,USA
+SSC-MA,Suburban Seahawks Club,USA
+SSC-OK,Sooner Swim Club,USA
+SST,Spring Swim Team,USA
+STAC,StreamLine Aquatics Club,USA
+SYS-FL,Sarasota Sharks,USA
+SYS-SN,Shasta YMCA Sharks,USA
+TANK,Shark Tank Racing Squad,USA
+TASC,Trojan Aquatics Swim Club,USA
+TCU,Texas Christian University,USA
+TDPS,The Dolphins Portland Swimming,USA
+TOPSCO,Univ of Denver Hilltoppers,USA
+TOPSMA,TOPS Swimming,USA
+TRSC,"Three Rivers Swim Club, Inc",USA
+TUS,Towson University Swimming,USA
+UN-AM,Unattached,USA
+UN-AR,Unattached,USA
+USC-FL,United Swim Club,USA
+USC-NE,United Swim Club,USA
+VOTX,Team Vortex,USA
+WESTMA,Western YMCA Wahoos,USA
+WESTPN,West Coast Aquatics,USA
+WFLA,West Florida Lightning Aquatic,USA
+WHY,Wheeling YMCA,USA
+WY,Westfield YMCA,USA
+XCEL,Excel Aquatics,USA
+AIA,Athletes In Action,USA
+AQST,AquaStorm,USA
+CFM,Central Florida Marlins,USA
+CKS,Club Kick Start,USA
+EA!,Elevation Athletics,USA
+FASTAZ,Flying Fish Arizona Swim Team,USA
+FORK,Pitchfork Aquatics,USA
+HACY,Hamilton Y Aquatic Club,USA
+HEAT,Hillsboro Swim Team,USA
+HSA,Huntsville Swim Association,USA
+KCSA,Kansas City Swim Academy,USA
+KSWM,KSwim,USA
+LTNC,Lifetime Swim Team North Carol,USA
+MACH,Machine Aquatics,USA
+NWAA,Northwest Arkansas Aquatics,USA
+PCAC,Penn Charter Aquatic Club,USA
+PSA,Planet Swim Aquatics,USA
+RAYSGA,Stingrays,USA
+RAYSOH,Mason Manta Rays,USA
+RENO,Reno Aquatic Club,USA
+TAC!,Tritons Aquatic Club,USA
+TPA,Trinity Prep Aquatics,USA
+UN-IA,Unattached,USA
+UN-PN,Unattached,USA
+USAC,US-Aquatics Club,USA
+WAC-CT,Woodbridge Aquatic Club,USA
+WAC-OH,Westerville Aquatic Club,USA
+YWSF,YMCA Westside Silver Fins,USA
+AAC-CO,Aspire Aquatics of Colorado,USA
+AAC-PV,Arlington Aquatic Club,USA
+CAMO,CAMO Natation,USA
+CAT,Corvallis Aquatic Team,USA
+CSC-MV,Columbia Swim Club,USA
+EEX,Eastern Express Swim Team,USA
+GCU,Grand Canyon University,USA
+HAT,Hatfield Swimming Club,USA
+LFSC,Lake Forest Swim Club,USA
+LOY,Lowes YMCA Lightning Swim Team,USA
+MERC,Mercersburg Academy,USA
+RKF,RKF Swim Team,USA
+UDAC,Upper Dublin Aquatic Club,USA
+UH,University of Houston,USA
+UN-SN,Unattached - Life,USA
+USC,United Swim Club,USA
+UVA-UT,"Utah Valley Aquatics, Inc",USA
+UVA-VA,University Of Virginia,USA
+BLR,Belarus,BLR
+ERT,European Aquatics Refugee Team,
+MLT,Malta,MLT
+AD,Arizona Dolphins,USA
+CS-FL,Club Seminole,USA
+CS-NE,Commonwealth Swimming,USA
+CSP,CSP Tideriders,USA
+DELM,Delmar Dolfins,USA
+GSC-AK,Glacier Swim Club,USA
+INDY,U Indy,USA
+IOL,Iolani Swim Club,USA
+KINGNE,Kingfish Swimming,USA
+KINGPN,King Aquatic Club,USA
+LVSC,Las Vegas Swim Club,USA
+MCC,McCallie-GPS Aquatics,USA
+MCK,McKendree University,USA
+NAACMD,Naval Academy Aquatic Club,USA
+NAACOH,New Albany Aquatic Club,USA
+NEB,University Of Nebraska,USA
+ODAC,Old Dominion Aquatic Club,USA
+OJAI,Ojai Heat Waves,USA
+PAC-IL,Patriot Aquatic Club,USA
+PAC-OR,Portland Aquatic Club,USA
+PSU,Penn State University,USA
+RAYSVA,Stingrays Swim Team,USA
+SAC-AZ,Scottsdale Aquatic Club,USA
+SAC-NE,Shawmut Aquatic Club,USA
+SMACNE,Southern Maine Aquatic Club,USA
+TAC-OK,Trident Aquatics Club,USA
+TEAMNC,Team Charlotte Swimming,USA
+TEAMOR,Team Eugene Aquatics-YMCA,USA
+TWS,Tidal Wave Swimming,USA
+UBST,University at Buffalo S T,USA
+UNCW,Uni of N Carolina Wilmimgton,USA
+UN-SD,Unattached,USA
+UW,University of Wisconsin,USA
+VAST,Verona Area Swim Team,USA
+WAVELA,Nu Wave Swim Club,USA
+WAVENC,New Wave Swim Team,USA
+WDST,Woodstock Dolphins Swim Team,USA
+YALE,Yale University,USA
+YORK,York Swim Club,USA
+BMU,Bermuda,USA
+CATO,Cato-Meridian Otters,USA
+CSSC,Coral Springs Swim Club,USA
+EAJ,Episcopal AmberJax,USA
+LEHY,Laurel East Hartford YMCA,USA
+MACM,Metro Aquatic Club of Miami,USA
+MCDA,Miami Country Day Aquatics,USA
+MELB,Swim Melbourne,USA
+MWA,Midtown Weston Aquatics,USA
+NMST,North Miami Swim Team,USA
+OCY,Ocean County YMCA,USA
+PAQ,Performance Aquatics,USA
+PCSC,Point Claire Swim Club,USA
+RFK,RFK Swim Team,USA
+TSA,TS Aquatics,USA
+VICT,Victor Swim Club,USA
+WAL,Wales,USA
+WRAT,Westport Weston Family Y Water,USA
+AA,Alligator Aquatics,USA
+ANV,Aquatica Nelson Vargas,USA
+BGR,Bulgaria,USA
+BLA,Blackline Aquatics,USA
+BLST,Black Hawk Area Swim Team,USA
+BNSC,Bloomington Normal Swim Club,USA
+BR,Clube de Regatas do Flamenco,USA
+BSU,Ball State University,USA
+CHL,Chile,USA
+DEU,Germany,USA
+GR,Grand Rapids Aquatics,USA
+IOWA,Iowa,USA
+LOSCIT,Langley Olympians Swim Club,USA
+LOSCOR,Lake Oswego Swim Club,USA
+MAC-IL,McGuire Aquatics,USA
+SIN,Singapore,USA
+TUR-,Turkey,USA
+TUR-FI,Turkey,USA
+UL-2,Unattached HSC,USA
+CARDIN,Cardinal Community Swim Club,USA
+CARDKY,Cardinal Aquatics,USA
+AGU,Anguilla,AGU
