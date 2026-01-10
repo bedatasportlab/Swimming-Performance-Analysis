@@ -53,10 +53,12 @@ A continuación, procedemos a la carga de estos archivos en el entorno de trabaj
 import pandas as pd
 import os
 
-path_atletas = 'atletas.csv'
-path_clubes = 'clubes.csv'
-path_competiciones = 'competiciones.csv'
-path_resultados = 'resultados.csv'
+BASE_PATH = 'data/processed_data/'
+
+path_atletas = f'{BASE_PATH}atletas.csv'
+path_clubes = f'{BASE_PATH}clubes.csv'
+path_competiciones = f'{BASE_PATH}competiciones.csv'
+path_resultados = f'{BASE_PATH}resultados.csv'
 
 # Carga de DataFrames
 try:
@@ -70,7 +72,7 @@ except FileNotFoundError as e:
     print(f"Error de carga: {e}")
 
 # Eliminamos las rutas de los archivos para no sobrecargar el entorno
-del path_atletas, path_clubes, path_competiciones, path_resultados
+del path_atletas, path_clubes, path_competiciones, path_resultados, BASE_PATH
 ```
 
 ## Exploración inicial
@@ -211,6 +213,448 @@ Tras la exploración inicial de los datos, procedemos a la fase de pre-procesami
 - Transformación de fechas
 - Transformaciones de texto
 - Creación de variables derivadas
+
+## Funciones Auxiliares
+
+Para llevar a cabo el pre-procesamiento de manera sistemática y reutilizable, hemos desarrollado las siguientes funciones:
+
+- `verificar_nulos(df, nombre_df)`: Detecta y cuantifica valores faltantes en cada columna.
+- `cambiar_tipos_datos(df, mapeo_tipos)`: Convierte tipos de datos según un diccionario especificado.
+- `limpiar_espacios_blancos(df)`: Elimina espacios en blanco al inicio y final de valores texto.
+- `transformar_fechas(df, columnas_fechas, columna_hora)`: Convierte columnas de fecha (y hora opcionalmente) a formato datetime.
+- `mostrar_resumen_preprocesamiento(df, nombre_df)`: Muestra un resumen del estado del DataFrame tras el pre-procesamiento.
+
+```{python}
+def verificar_nulos(df, nombre_df):
+    """
+    Datos de entrada:
+    - df: DataFrame a analizar.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+
+    Funcionalidad:
+    Detecta y cuantifica valores nulos/faltantes en cada columna del DataFrame.
+    """
+    print(f"### Análisis de Valores Nulos: {nombre_df}")
+    
+    nulos_por_columna = df.isnull().sum()
+    porcentaje_nulos = (df.isnull().sum() / len(df)) * 100
+    
+    if nulos_por_columna.sum() == 0:
+        print("No se detectaron valores nulos en el DataFrame.")
+    else:
+        resumen_nulos = pd.DataFrame({
+            'Columna': nulos_por_columna.index,
+            'Cantidad': nulos_por_columna.values,
+            'Porcentaje': porcentaje_nulos.values
+        })
+        resumen_nulos = resumen_nulos[resumen_nulos['Cantidad'] > 0].sort_values('Cantidad', ascending=False)
+        print(resumen_nulos.to_string(index=False))
+    
+    print("-" * 50)
+
+def cambiar_tipos_datos(df, mapeo_tipos):
+    """
+    Datos de entrada:
+    - df: DataFrame a transformar.
+    - mapeo_tipos: Diccionario con columnas y sus tipos destino. (Dict)
+
+    Funcionalidad:
+    Convierte el tipo de datos de las columnas especificadas.
+    """
+    print("### Conversión de Tipos de Datos")
+    
+    for columna, tipo in mapeo_tipos.items():
+        if columna in df.columns:
+            try:
+                df[columna] = df[columna].astype(tipo)
+                print(f"✓ Columna '{columna}' convertida a {tipo.__name__}")
+            except Exception as e:
+                print(f"✗ Error al convertir '{columna}': {e}")
+        else:
+            print(f"⚠ Columna '{columna}' no encontrada en el DataFrame.")
+    
+    print("-" * 50)
+    return df
+
+def limpiar_espacios_blancos(df):
+    """
+    Datos de entrada:
+    - df: DataFrame a limpiar.
+
+    Funcionalidad:
+    Elimina espacios en blanco al inicio y final de valores de texto.
+    """
+    print("### Limpieza de Espacios en Blanco")
+    
+    columnas_procesadas = 0
+    for columna in df.select_dtypes(include=['object']).columns:
+        df[columna] = df[columna].str.strip()
+        columnas_procesadas += 1
+    
+    print(f"Se procesaron {columnas_procesadas} columnas de tipo texto.")
+    print("-" * 50)
+    return df
+
+def transformar_fechas(df, columnas_fechas, columna_hora=None):
+    """
+    Datos de entrada:
+    - df: DataFrame a transformar.
+    - columnas_fechas: Lista de columnas a convertir a datetime. (List)
+    - columna_hora: (Opcional) Columna con hora para combinar con la primera fecha. (String)
+
+    Funcionalidad:
+    Convierte columnas especificadas al formato datetime.
+    Si se proporciona columna_hora, combina fecha + hora en una nueva columna 'fecha_hora'.
+    """
+    print("### Transformación de Fechas")
+    
+    for columna in columnas_fechas:
+        if columna in df.columns:
+            try:
+                df[columna] = pd.to_datetime(df[columna], errors='coerce')
+                print(f"✓ Columna '{columna}' convertida a datetime")
+            except Exception as e:
+                print(f"✗ Error al convertir '{columna}': {e}")
+        else:
+            print(f"⚠ Columna '{columna}' no encontrada.")
+    
+    # Si se proporciona una columna de hora, combinar fecha + hora
+    if columna_hora and columna_hora in df.columns and len(columnas_fechas) > 0:
+        columna_fecha = columnas_fechas[0]
+        if columna_fecha in df.columns:
+            try:
+                df['fecha_hora'] = pd.to_datetime(
+                    df[columna_fecha].astype(str) + ' ' + df[columna_hora].astype(str),
+                    format='%Y-%m-%d %H:%M:%S',
+                    errors='coerce'
+                )
+                print(f"✓ Columna 'fecha_hora' creada combinando '{columna_fecha}' y '{columna_hora}'")
+            except Exception as e:
+                print(f"✗ Error al combinar fecha y hora: {e}")
+    
+    print("-" * 50)
+    return df
+
+def mostrar_resumen_preprocesamiento(df, nombre_df):
+    """
+    Datos de entrada:
+    - df: DataFrame procesado.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+
+    Funcionalidad:
+    Muestra un resumen del estado actual del DataFrame.
+    """
+    print(f"### Resumen Post-Procesamiento: {nombre_df}")
+    print(f"Dimensiones: {df.shape[0]} filas x {df.shape[1]} columnas")
+    print(f"Valores nulos totales: {df.isnull().sum().sum()}")
+    print("\n--- Tipos de datos ---")
+    print(df.dtypes)
+    print("\n" + "="*50 + "\n")
+```
+
+## Tratamiento de Tipos de Datos
+
+Comenzamos transformando los tipos de datos de las columnas para asegurar que cada variable tiene el formato adecuado para análisis posterior.
+
+### Atletas
+
+```{python}
+# Definimos el mapeo de tipos para df_atletas
+tipos_atletas = {
+    'ID': int,
+    'NOMBRE': str,
+    'APELLIDOS': str,
+    'birthday': str,  # Convertiremos a datetime en el siguiente paso
+    'género': str
+}
+
+df_atletas = cambiar_tipos_datos(df_atletas, tipos_atletas)
+```
+
+### Clubes
+
+```{python}
+# Definimos el mapeo de tipos para df_clubes
+tipos_clubes = {
+    'club_code': str,
+    'club_name': str,
+    'club_nation': str
+}
+
+df_clubes = cambiar_tipos_datos(df_clubes, tipos_clubes)
+```
+
+### Competiciones
+
+```{python}
+# Definimos el mapeo de tipos para df_competiciones
+tipos_competiciones = {
+    'ID': int,
+    'nombre': str,
+    'ciudad': str,
+    'tipo_piscina': str,
+    'pais': str,
+    'fecha_inicio': str,  # Convertiremos a datetime después
+    'fecha_fin': str,     # Convertiremos a datetime después
+    'cronometraje': str,
+    'numeroCalles': int
+}
+
+df_competiciones = cambiar_tipos_datos(df_competiciones, tipos_competiciones)
+```
+
+### Resultados
+
+```{python}
+# Definimos el mapeo de tipos para df_resultados
+tipos_resultados = {
+    'id_competicion': int,
+    'id_atleta': int,
+    'club_code': str,
+    'distancia': int,
+    'estilo': str,
+    'ronda': str,
+    'tiempo_final': str,  # Lo transformaremos en la sección de transformaciones
+    'descalificado?': str,
+    'puntos': int,
+    'distancia_parcial': int,
+    'tiempo_acumulado': str,
+    'fecha': str,  # Convertiremos a datetime después
+    'hora': str    # Convertiremos a datetime después
+}
+
+df_resultados = cambiar_tipos_datos(df_resultados, tipos_resultados)
+```
+
+## Manejo de Valores Nulos
+
+Realizamos un análisis exhaustivo de valores faltantes en cada DataFrame y decidimos cómo tratarlos.
+
+### Atletas
+
+```{python}
+verificar_nulos(df_atletas, 'Atletas')
+```
+
+### Clubes
+
+```{python}
+verificar_nulos(df_clubes, 'Clubes')
+```
+
+### Competiciones
+
+```{python}
+verificar_nulos(df_competiciones, 'Competiciones')
+```
+
+### Resultados
+
+```{python}
+verificar_nulos(df_resultados, 'Resultados')
+```
+
+
+## Limpieza de Espacios en Blanco
+
+Aseguramos la eliminación de posibles espacios en blanco superfluos en las columnas de texto de todos los DataFrames.
+
+```{python}
+df_atletas = limpiar_espacios_blancos(df_atletas)
+df_clubes = limpiar_espacios_blancos(df_clubes)
+df_competiciones = limpiar_espacios_blancos(df_competiciones)
+df_resultados = limpiar_espacios_blancos(df_resultados)
+```
+
+## Transformación de Fechas
+
+Convertimos las columnas de fechas al formato `datetime` para facilitar análisis temporales.
+
+### Atletas
+
+```{python}
+# Convertimos la fecha de nacimiento
+df_atletas = transformar_fechas(df_atletas, ['birthday'])
+
+# Renombramos la columna para mayor claridad
+df_atletas.rename(columns={'birthday': 'fecha_nacimiento'}, inplace=True)
+```
+
+### Competiciones
+
+```{python}
+# Convertimos las fechas de inicio y fin de las competiciones
+df_competiciones = transformar_fechas(df_competiciones, ['fecha_inicio', 'fecha_fin'])
+```
+
+### Resultados
+
+```{python}
+# Convertimos la fecha y hora de los resultados
+df_resultados = transformar_fechas(df_resultados, ['fecha'], columna_hora='hora')
+```
+
+Al disponer de la fecha y hora, la función nos devuelve el datetime completo en la columna `fecha_hora`.
+
+## Transformaciones de Texto
+
+Realizamos transformaciones en variables de texto para estandarizarlas y mejorar su calidad.
+
+### Normalización de Géneros
+
+```{python}
+
+# Verificamos valores únicos antes de la transformación
+print(f"Valores únicos en 'género': {df_atletas['género'].unique()}")
+
+# Estandarizamos los valores (Hombre/Mujer, H/M, etc.)
+df_atletas['género'] = df_atletas['género'].str.upper()
+df_atletas['género'] = df_atletas['género'].replace({
+    'M': 'HOMBRE',
+    'F': 'MUJER',
+    'MALE': 'HOMBRE',
+    'FEMALE': 'MUJER'
+})
+
+print(f"Valores normalizados: {df_atletas['género'].unique()}")
+print("-" * 50)
+```
+
+Como los valores para género son únicos y correctos (no existen valores diferentes o en minúsculas), no es necesario realizar ninguna transformación adicional.
+
+### Normalización de Pruebas y Rondas
+
+```{python}
+print("### Normalización de Pruebas y Rondas")
+
+# Convertimos a mayúsculas para estandarización
+df_resultados['estilo'] = df_resultados['estilo'].str.upper()
+df_resultados['ronda'] = df_resultados['ronda'].str.upper()
+
+print(f"Pruebas únicas (primeras 10): {df_resultados['estilo'].unique()[:10]}")
+print(f"Rondas únicas: {df_resultados['ronda'].unique()}")
+print("-" * 50)
+```
+
+Se asegura la unicidad de los valores en las columnas `estilo` y `ronda` tras la normalización transformando las cadenas de texto en mayúsculas.
+
+## Creación de Variables Derivadas
+
+Creamos nuevas variables que serán útiles para el análisis posterior.
+
+### Duración de Competiciones
+
+```{python}
+print("### Creación de Variable: Duración de Competiciones")
+
+# Calculamos la duración en días de cada competición
+df_competiciones['duracion_dias'] = (df_competiciones['fecha_fin'] - df_competiciones['fecha_inicio']).dt.days + 1
+
+print(f"Duración mínima: {df_competiciones['duracion_dias'].min()} días")
+print(f"Duración máxima: {df_competiciones['duracion_dias'].max()} días")
+print(f"Duración promedio: {df_competiciones['duracion_dias'].mean():.1f} días")
+print("-" * 50)
+```
+
+### Parseo de Tiempos
+
+```{python}
+def parse_resultados_temporal(df):
+    # trabajar sobre copia
+    df = df.copy()
+    # Normalizar separador decimal en las columnas de tiempo (si hubiera comas)
+    df['tiempo_final'] = df['tiempo_final'].astype(str).str.replace(',', '.', regex=False)
+    df['tiempo_acumulado'] = df.get('tiempo_acumulado', pd.Series(dtype=str)).astype(str).str.replace(',', '.', regex=False)
+
+    # Combinar fecha + hora -> datetime (ajusta format si tu formato difiere)
+    df['fecha_hora'] = pd.to_datetime(
+        df['fecha'].astype(str) + ' ' + df['hora'].astype(str),
+        format='%Y-%m-%d %H:%M',
+        errors='coerce'
+    )
+
+    # Convertir tiempos "HH:MM:SS.ss" a Timedelta y después a segundos (float)
+    df['tiempo_final_td'] = pd.to_timedelta(df['tiempo_final'], errors='coerce')
+    df['tiempo_final_seg'] = df['tiempo_final_td'].dt.total_seconds()
+
+    if 'tiempo_acumulado' in df.columns:
+        df['tiempo_acumulado_td'] = pd.to_timedelta(df['tiempo_acumulado'], errors='coerce')
+        df['tiempo_acumulado_seg'] = df['tiempo_acumulado_td'].dt.total_seconds()
+
+    # Extracción de variables temporales (evitar acentos en nombres de columna)
+    df['anio_competicion'] = df['fecha_hora'].dt.year
+    df['mes_competicion'] = df['fecha_hora'].dt.month
+    df['dia_semana'] = df['fecha_hora'].dt.day_name()
+
+    return df
+
+# Aplicamos la función a la columna de tiempos
+df_resultados = parse_resultados_temporal(df_resultados)
+
+print(f"Tiempos convertidos exitosamente")
+print(f"Tiempo mínimo final: {df_resultados['tiempo_final_seg'].min():.2f} segundos")
+print(f"Tiempo máximo final: {df_resultados['tiempo_final_seg'].max():.2f} segundos")
+print(f"Tiempos finales faltantes: {df_resultados['tiempo_final_seg'].isnull().sum()}")
+
+print(f"Tiempo mínimo acumulado: {df_resultados['tiempo_acumulado_seg'].min():.2f} segundos")
+print(f"Tiempo máximo acumulado: {df_resultados['tiempo_acumulado_seg'].max():.2f} segundos")
+print(f"Tiempos acumulados faltantes: {df_resultados['tiempo_acumulado_seg'].isnull().sum()}")
+print("-" * 50)
+```
+
+### Extracción de Información Temporal
+
+```{python}
+print("### Extracción de Variables Temporales")
+
+# Extraemos el año de las competiciones
+df_resultados['anio_competicion'] = df_resultados['fecha'].dt.year
+df_resultados['mes_competicion'] = df_resultados['fecha'].dt.month
+df_resultados['dia_semana'] = df_resultados['fecha'].dt.day_name()
+
+# Extraemos también de las competiciones
+df_competiciones['anio'] = df_competiciones['fecha_inicio'].dt.year
+
+print(f"Años en competiciones: {sorted(df_competiciones['anio'].unique())}")
+print(f"Meses representados: {sorted(df_resultados['mes_competicion'].unique())}")
+print("-" * 50)
+```
+
+## Resumen Post-Procesamiento
+
+Finalmente, mostramos un resumen del estado de cada DataFrame tras todas las transformaciones realizadas.
+
+### Atletas
+
+```{python}
+mostrar_resumen_preprocesamiento(df_atletas, 'Atletas')
+```
+
+Tanto la variable `ID` como la variable `edad` se han convertido a tipo entero (`int`), mientras que la variable `fecha_nacimiento` se ha convertido a tipo fecha (`datetime`). Además, no se han detectado valores nulos en este DataFrame tras el pre-procesamiento.
+
+### Clubes
+
+```{python}
+mostrar_resumen_preprocesamiento(df_clubes, 'Clubes')
+```
+
+El DataFrame `df_clubes` mantiene las mismas columnas y tipos de datos dado que todas sus columnas son cadenas de carácteres. Tampoco no se han detectado valores nulos tras el pre-procesamiento.
+
+### Competiciones
+
+```{python}
+mostrar_resumen_preprocesamiento(df_competiciones, 'Competiciones')
+```
+
+En el DataFrame `df_competiciones` se han visto transformadas las columnas `fecha_inicio` y `fecha_fin` a tipo fecha (`datetime`), y se ha añadido la columna derivada `duracion_dias` de tipo entero (`int`) y la columna `anio` de tipo entero también. También se han transformado a entero las columnas `ID` y `numeroCalles`. No se han detectado valores nulos tras el pre-procesamiento.
+
+### Resultados
+
+```{python}
+mostrar_resumen_preprocesamiento(df_resultados, 'Resultados')
+```
+
+Por último, en el Dataframe de resultados, se han convertido las columnas `id_competicion`, `id_atleta`, `puntos` y distancia parcial a tipo entero (`int`). Además, se han añadido varias columnas derivadas: `fecha_hora` de tipo fecha (`datetime`) de las columnas `fecha` y `hora`, `tiempo_final_seg` y `tiempo_acumulado_seg` de tipo flotante (`float`), y las columnas `anio_competicion`, `mes_competicion` y `dia_semana`. También se han añadido las columnas `tiempo_acumulado_td` y `tiempo_final_td` de tipo `timedelta` por si fuera necesario.
 
 # Procesamiento y Análisis
 - Operaciones de join
