@@ -202,7 +202,7 @@ Procedemos de manera similar con el Dataframe `df_resultados`, que contiene info
 explorar_estructura(df_resultados, 'Resultados', 5)
 ```
 
-Se observa que el DataFrame `df_resultados` tiene 179696 filas y 13 columnas. Cada registro contiene variables significantes para los resultados como el identificador de la competición (`id_competicion`), el identificador del nadador (`id_atleta`), el identificador del club o país (`club_code`), y datos sobre la prueba nadada, la ronda, el tiempo realizado, la fecha y hora a la que nadó, entre otros. Cabe destacar el formato en el que se presentan los resultados, ya que, por cada parcial que nadó el nadaor, se genera un registro independiente en el DataFrame. Es por ello que, como se puede observar, las 2 primeras filas del DataFrame corresponden al resultado del nadador con id 16422 en el 100 BREAST de la ronda PRE, donde la primera fila contiene información sobre el paso por el primer parcial (50m) y la segunda fila contiene el tiempo acumulado en el paso por el segundo y último parcial (100m). 
+Se observa que el DataFrame `df_resultados` tiene 179696 filas y 13 columnas. Cada registro contiene variables significantes para los resultados como el identificador de la competición (`id_competicion`), el identificador del nadador (`id_atleta`), el identificador del club o país (`club_code`), y datos sobre la prueba nadada, la ronda, el tiempo realizado, la fecha y hora a la que nadó, entre otros. Cabe destacar el formato en el que se presentan los resultados, ya que, por cada parcial que nadó el nadador, se genera un registro independiente en el DataFrame. Es por ello que, como se puede observar, las 2 primeras filas del DataFrame corresponden al resultado del nadador con id 16422 en el 100 BREAST de la ronda PRE, donde la primera fila contiene información sobre el paso por el primer parcial (50m) y la segunda fila contiene el tiempo acumulado en el paso por el segundo y último parcial (100m). 
 
 # Pre-procesamiento
 
@@ -657,9 +657,191 @@ mostrar_resumen_preprocesamiento(df_resultados, 'Resultados')
 Por último, en el Dataframe de resultados, se han convertido las columnas `id_competicion`, `id_atleta`, `puntos` y distancia parcial a tipo entero (`int`). Además, se han añadido varias columnas derivadas: `fecha_hora` de tipo fecha (`datetime`) de las columnas `fecha` y `hora`, `tiempo_final_seg` y `tiempo_acumulado_seg` de tipo flotante (`float`), y las columnas `anio_competicion`, `mes_competicion` y `dia_semana`. También se han añadido las columnas `tiempo_acumulado_td` y `tiempo_final_td` de tipo `timedelta` por si fuera necesario.
 
 # Procesamiento y Análisis
-- Operaciones de join
-- Operaciones de group by
-- Cálculo de métricas
+
+Teniendo los conjuntos de datos ordenados, se procede a realizar operaciones que permitan combinarlos para poder hacer los análisis y obtener métricas interesantes para el rendimiento.
+
+## Operaciones de join
+
+### Atletas con sus resultados
+
+En esta primera operación se quieren juntar los resultados de los atletas en cada competición en el que han participado con sus datos personales:
+
+El *df_atletas* se junta con *df_resultados* para obtener una fila por cada resultado en *resultados_atletas*. Es decir, cada atleta tendrá tantas filas como resultados en las distintas competiciones de cada año. 
+
+Todos los resultados tienen algún atleta asociado. Sin embargo, puede haber algún atleta que no tenga todos los resultados registrados. Para no perder la información de ningún atleta se utiliza el *left join*.
+
+```{python}
+resultados_atletas = pd.merge(df_atletas, df_resultados, left_on='ID', right_on='id_atleta', how='left')
+
+#Comprobar resultados
+print("Resultados de los atletas por prueba y competición:")
+print(resultados_atletas[['NOMBRE', 'APELLIDOS', 'fecha_nacimiento', 'género', 'distancia', 'estilo', 'ronda', 'tiempo_final', 'descalificado?', 'puntos']])
+```
+
+### Clubes por competición
+
+En esta segunda operación se busca juntar en una tabla todos los clubes que han participado en cada competición.
+
+Para ello se juntan *resultados_atletas* (tiene el id de la competición y el código del club), *df_competiciones* (tiene el id de la competición y el nombre de la competición) y *df_clubes* (tiene el código del club y el nombre del club).
+
+Se empieza haciendo un join entre *resultados_atletas* y *df_competiciones* en base al id de la competición. Se crea un df intermedio llamado *competiciones_clubes_sin_nombre*. A este df se le une *df_clubes* en base al código del club. El resultado es un df llamado *clubes_competicion_ampliado* en el que hay una fila por cada atleta que ha participado en cada competición representando a su club.
+
+En los dos merges se utiliza *outer join* para mantener la información de todas las filas de las tres tablas en caso de que hubiera inconsistencias.
+
+```{python}
+competiciones_clubes_sin_nombre = pd.merge(resultados_atletas, df_competiciones, right_on='ID',left_on='id_competicion', how='outer')
+
+clubes_competicion_ampliado = pd.merge(competiciones_clubes_sin_nombre, df_clubes, on='club_code', how='outer')
+
+#Comprobar resultados
+print("Representación de los clubes participantes por competición:")
+print(clubes_competicion_ampliado[['id_competicion', 'id_atleta', 'club_code', 'club_name', 'nombre', 'anio', 'ciudad']].head(10))
+```
+
+```{python}
+# Se borra el df intermedio para no sobrecargar
+del competiciones_clubes_sin_nombre
+```
+
+## Operaciones de groupby
+
+### Estadísticas de participación en competiciones por club
+
+El dataframe *clubes_competicion_ampliado* tiene una fila por cada participación del atleta que representa a su club en una competición. Es decir, si en un campeonato un nadador ha realizado 3 pruebas distintas, habrá tres filas distitntas.
+
+En esta primera operación de groupby se busca obtener un dataframe en el que haya una fila por cada atleta que haya participado en una competición determinada, independientemente del número de pruebas en el que tenga un resultado registrado.
+
+A partir de ahí se hará un conteo para identificar cuántos atletas distintos han representado a un club en una competición determinada.
+
+```{python}
+representacion_clubes_competicion = clubes_competicion_ampliado.groupby(
+    ['id_competicion', 'club_code'], as_index = False).agg({
+'id_atleta': 'nunique', #contar cuántos atletas distintos hay de cada club
+'club_name': 'first', #estando ya agrupados y habiendo contado los atletas distintos, se pone la primera vez que aparece el nombre de cada club (en las siguientes: de cada competición, su año y su lugar de realización)
+'nombre': 'first',
+'anio': 'first',
+'ciudad': 'first'
+})
+
+#Renombrar columna
+representacion_clubes_competicion = representacion_clubes_competicion.rename(
+    columns={'id_atleta': 'atletas_distintos'}
+)
+
+print(representacion_clubes_competicion[['atletas_distintos', 'club_code', 'club_name', 'nombre', 'anio', 'ciudad']].head(10))
+```
+
+### Ranking de participación
+
+A partir de aquí se puede encontrar el club con mayor representación en una competición y crear un ranking con los clubes que mayor paricipación han tenido:
+
+```{python}
+maxima_participacion = representacion_clubes_competicion.loc[representacion_clubes_competicion["atletas_distintos"].idxmax()]
+print(f"El club con más participación ha sido: {maxima_participacion['club_name']} - {maxima_participacion['atletas_distintos']} nadadores.")
+
+maxima_participacion = representacion_clubes_competicion.sort_values(by="atletas_distintos", ascending = False)
+print(maxima_participacion.head(10))
+```
+
+### Estadísticas de competición por atleta
+
+En esta segunda operación de groupby se calculan las estadísticas de competición para cada atleta:
+
+- El número de competiciones distintas en las que han participado. 
+- El número de veces que han competido en cada año.
+- El número de competiciones por año.
+
+```{python}
+estadisticas_atleta_competicion = (resultados_atletas
+    .groupby("ID")
+    .agg({
+    "NOMBRE": "first",
+    "APELLIDOS": "first",
+    "fecha_nacimiento": "first",
+    "género": "first",
+    "id_competicion" : "nunique",
+    "ronda": 'nunique',
+    "anio_competicion": "nunique"
+    })
+)
+
+#Renombrar columnas
+estadisticas_atleta_competicion = estadisticas_atleta_competicion.rename(
+    columns={'id_competicion': 'num_comp_realizadas',
+    'ronda':'total_carreras_realizadas',
+    'anio_competicion': 'num_temp_realizadas'}
+)
+
+print(estadisticas_atleta_competicion.head(10))
+```
+
+### Estadísticas de competición por temporada y atleta
+
+A continuación se calculan las mismas estadísticas que se han presentado en el apartado anterior agrupándolas por temporada:
+
+```{python}
+estadisticas_atleta_temporada = (resultados_atletas
+    .groupby(["ID", "anio_competicion"])
+    .agg({
+    "NOMBRE": "first",
+    "APELLIDOS": "first",
+    "fecha_nacimiento": "first",
+    "género": "first",
+    "id_competicion" : "nunique",
+    "ronda": 'nunique',
+    })
+    .assign(competiciones_por_anio=lambda x: x["id_competicion"])
+)
+
+#Renombrar columnas
+estadisticas_atleta_temporada = estadisticas_atleta_temporada.rename(
+    columns={'id_competicion': 'num_comp_realizadas',
+    'ronda':'total_carreras_realizadas'}
+)
+
+print(estadisticas_atleta_temporada.head(10))
+```
+
+### Estadísticas de rendimiento por atleta
+
+En este apartado se definen las siguientes métricas que perfilarán al nadador según su especialidad (distancia y estilo) y su rendimiento:
+- Número de veces que ha alcanzado una final.
+- En cuántos estilos es especialista y cuáles son.
+- En qué disciplina ha llegado más veces a una final.
+
+```{python}
+#Definir disciplina y crear una columna
+resultados_atletas["disciplina"] = (resultados_atletas["distancia"]).astype(str) + "m " + resultados_atletas["estilo"]
+
+#Reordenar columna
+cols = resultados_atletas.columns.tolist()
+pos = cols.index("estilo") + 1
+cols.insert(pos, cols.pop(cols.index("disciplina")))
+resultados_atletas = resultados_atletas[cols]
+```
+
+```{python}
+# Filtrar finales
+finales = resultados_atletas[resultados_atletas["ronda"] == "FIN"]
+
+estadisticas_rendimiento = resultados_atletas.groupby("ID").agg(
+    NOMBRE=("NOMBRE", "first"),
+    APELLIDOS=("APELLIDOS", "first"),
+    fecha_nacimiento=("fecha_nacimiento", "first"),
+    género=("género", "first"),
+    total_finales=("ronda", lambda x: (x == "FIN").sum()),
+    num_estilos=("estilo", "nunique"),
+    estilos=("estilo", lambda x: list(sorted(x.unique())))
+).reset_index()
+
+# Añadir disciplina con más finales
+disciplina_top = finales.groupby("ID")["disciplina"].agg(lambda x: x.mode()[0] if len(x) > 0 else None).reset_index()
+estadisticas_rendimiento = estadisticas_rendimiento.merge(disciplina_top, on="ID", how="left")
+```
+
+## Cálculo de métricas
+
+- Idea: Obtener la mejor marca de un atleta en cada prueba
 
 # Análisis y Visualizaciones
 - Preguntas con visualizaciones (+3)
