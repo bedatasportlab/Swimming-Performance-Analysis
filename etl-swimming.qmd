@@ -1044,7 +1044,40 @@ fig_evol.show()
 Visualizamos la representación de los clubes o países en una competición específica para entender el evento: 
 
 ```{python}
+target_comp_id = 1  
+df_participacion = representacion_clubes_competicion[
+    representacion_clubes_competicion['id_competicion'] == target_comp_id
+].copy()
 
+df_top10 = df_participacion.sort_values('atletas_distintos', ascending=False).head(10)
+
+nombre_competicion = df_top10['nombre'].iloc[0]
+anio_competicion = df_top10['anio'].iloc[0]
+
+print(f"Graficando Top 10 para: {nombre_competicion} ({anio_competicion})")
+
+# 4. Graficar
+fig_part = px.bar(
+    df_top10,
+    x='club_name',       # Eje X: Nombre del Club/País
+    y='atletas_distintos', # Eje Y: Cantidad de nadadores
+    text_auto=True,      # Muestra el número encima de la barra automáticamente
+    color='atletas_distintos', # Colorea según la cantidad (opcional, queda bonito)
+    title=f"Top 10 Participación: {nombre_competicion}",
+    labels={
+        'club_name': 'Club / País',
+        'atletas_distintos': 'Nº Atletas'
+    },
+    template="plotly_white"
+)
+
+# Ajustes de diseño
+fig_part.update_layout(
+    xaxis_tickangle=-45, # Inclina los nombres si son muy largos
+    showlegend=False      # Ocultamos la leyenda porque el color ya da la info
+)
+
+fig_part.show()
 ```
 
 ## Preguntas directas sobre los datos
