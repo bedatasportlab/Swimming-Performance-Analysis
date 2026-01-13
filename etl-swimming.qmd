@@ -977,7 +977,66 @@ Observamos que gracias a la propulsión del trampolín, es capaz de nadar el pri
 Vamos a analizar cómo ha evolucionado el rendimiento de Katie Ledecky a lo largo del tiempo para la prueba de 800m FREE. 
 
 ```{python}
+import plotly.express as px
+import pandas as pd
 
+
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_prueba = "800m FREE" 
+
+
+df_evolucion = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains(target_prueba, case=False))
+].copy()
+
+
+df_evolucion = df_evolucion.drop_duplicates(subset=['id_competicion', 'ronda'])
+
+
+if 'nombre' not in df_evolucion.columns:
+    df_evolucion = pd.merge(df_evolucion, df_competiciones[['ID', 'nombre', 'ciudad']], 
+                            left_on='id_competicion', right_on='ID', how='left')
+
+
+df_evolucion = df_evolucion.sort_values('fecha_hora')
+
+print(f"Registros para graficar: {len(df_evolucion)}")
+
+
+fig_evol = px.line(
+    df_evolucion,
+    x='fecha_hora',       
+    y='tiempo_final_seg', 
+    markers=True,         
+    text=df_evolucion['ronda'].str[0], 
+    hover_name='nombre',  
+    hover_data={
+        'fecha_hora': '|%Y-%m-%d', 
+        'tiempo_final_seg': False, 
+        'tiempo_final': True,      
+        'ronda': True,             
+        'ciudad': True
+    },
+    title=f"Evolución de Rendimiento: {target_nombre} {target_apellido} - {target_prueba}",
+    template="plotly_white"
+)
+
+fig_evol.update_traces(
+    line=dict(color='#1f77b4', width=3), 
+    marker=dict(size=8, symbol='circle'), 
+    textposition="top center" 
+)
+
+fig_evol.update_layout(
+    xaxis_title="Fecha",
+    yaxis_title="Tiempo (segundos)",
+    yaxis=dict(autorange="reversed") 
+)
+
+fig_evol.show()
 ```
 
 ## Participación por Clubes en Competiciones Clave. 
