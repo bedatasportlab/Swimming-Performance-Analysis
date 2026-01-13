@@ -878,9 +878,6 @@ df_atletas = df_atletas.merge(
     how='left'
 )
 df_atletas.rename(columns={'porcentaje_mejora': 'promedio_mejora_global'}, inplace=True)
-
-print(f"\nTop 5 nadadores con mayor % de mejora promedio:")
-display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(5))
 ```
 
 
@@ -1085,12 +1082,46 @@ fig_part.show()
 ### ¿Qué nadador ha tenido la mayor mejora porcentual promedio?
 
 ```{python}
-
+print(f"\nTop 1 nadador con mayor % de mejora promedio:")
+display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(1))
 ```
 
 ### ¿Cuáles son la prueba más rápida del ciclo (menor tiempo registrado)?
 
+```{python}
+idx_min = resultados_atletas['tiempo_final_seg'].idxmin()
+registro_record = resultados_atletas.loc[idx_min]
+tiempo_str = registro_record['tiempo_final'] # Para mostrarlo bonito (texto)
+
+# 4. Imprimir resultado
+print(f"El tiempo final más bajo ({tiempo_str}) se realizó en la prueba {registro_record['disciplina']}")
+```
+
 ### ¿Qué nadador ha competido más veces durante el ciclo? ¿Y menos?
+
+```{python}
+
+participacion_atletas = resultados_atletas.groupby(['id_atleta', 'NOMBRE', 'APELLIDOS'])['id_competicion'].nunique().reset_index()
+participacion_atletas.rename(columns={'id_competicion': 'num_competiciones'}, inplace=True)
+
+max_comps = participacion_atletas['num_competiciones'].max()
+min_comps = participacion_atletas['num_competiciones'].min()
+
+nadadores_max = participacion_atletas[participacion_atletas['num_competiciones'] == max_comps]
+nadadores_min_count = len(participacion_atletas[participacion_atletas['num_competiciones'] == min_comps])
+
+print(f"--- Análisis de Asistencia ---")
+
+print(f"El récord de asistencia es de {max_comps} competiciones.")
+print("Nadador(es) con más participaciones:")
+for index, row in nadadores_max.iterrows():
+    print(f"- {row['NOMBRE']} {row['APELLIDOS']}")
+
+print("-" * 30)
+print(f"El mínimo de asistencia es de {min_comps} competición.")
+print(f"Hay {nadadores_min_count} nadadores que solo han acudido a una única competición registrada en el ciclo.")
+```
+
 
 # Conclusiones
 - Hallazgos principales
