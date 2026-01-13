@@ -30,9 +30,6 @@ El **objetivo principal** del análisis es transformar los datos crudos en infor
 *sección modificable acorde al desarrollo mismo del proyecto*
 
 # Organización y Gestión del Proyecto
-- Organización del Equipo
-- Gestión de código
-- Funciones desarrolladas
 
 Para la gestión del código se ha utilizado Git como herramienta de control de versiones y GitHub como plataforma de colaboración y compartición de código. El repositorio se estructura en carpetas para separar los datos crudos de las competiciones de natación, los datos procesados para su estructura en CSV, los scripts de ETL y la documentación del proyecto.
 
@@ -54,7 +51,13 @@ Para cada issue creado en GitHub Projects, se le asigna un Pull Request (PR) aso
 Tablero Kanban con issues gestionados en GitHub Projects.
 :::
 
-*sección a completar tras el desarrollo del proyecto*
+Por otro lado en cuanto a las funciones de cada miembro del proyecto han sido las siguientes:
+- Alba Martínez de la Hermosa: encargada de desarrollar el análisis de los datos y plantear preguntas y visualizaciones para extraer la máxima información de los datos.
+- Alonso González Romero: experto en el dominio del problema, encargado de la extracción de los datos, así como de la correcta visualización de los resultados.
+- Daniel López Paredes: encargado de las transformaciones en el proceso ETL y de la gestión del proyecto en GitHub mediante el uso de ramas, creación de issues, revisión de pull requests (PR), etc.
+
+Es importante destacar que todos los miembros del proyecto utilizan Git y Github para hacer commits, subir cambios al repositorio y crear ramas para cada funcionalidad desarrollada a lo largo del proyecto. Esto facilita la colaboración y el seguimiento de la evolución del proyecto.
+
 
 # Extracción de Datos
 
