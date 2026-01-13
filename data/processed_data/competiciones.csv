@@ -1,0 +1,22 @@
+ID,nombre,ciudad,tipo_piscina,fecha_inicio,fecha_fin,pais,cronometraje,numeroCalles
+1,World Aquatics Championships,Doha,LCM,2024-02-11,2024-02-18,QAT,AUTOMATIC,10
+2,World Aquatics Junior Swimming Championships,Netanya,LCM,2023-09-04,2023-09-09,ISR,AUTOMATIC,10
+3,2023 Toyota US Open Championships,"Greensboro, NC",LCM,2023-11-29,2023-12-02,USA,AUTOMATIC,9
+4,Phillips 66 International Team Trials,"Greensboro, NC",LCM,2022-04-26,2022-04-30,USA,AUTOMATIC,10
+5,19th FINA World Championships,Budapest,LCM,2022-06-18,2022-06-25,HUN,AUTOMATIC,10
+6,2022 Phillips 66 National Championships,"Irvine, CA",LCM,2022-07-26,2022-07-30,USA,AUTOMATIC,10
+7,2022 Speedo Junior National Championships,"Irvine, CA",LCM,2022-08-01,2022-08-05,USA,AUTOMATIC,10
+8,8th FINA World Junior Swimming Championships,Lima,LCM,2022-08-30,2022-09-04,PER,AUTOMATIC,10
+9,2022 Toyota US Open Championships,"Greensboro, NC",LCM,2022-11-30,2022-12-03,USA,AUTOMATIC,10
+10,2021 TYR Pro Swim Series - San Antonio,"San Antonio, TX",LCM,2021-01-14,2021-01-17,USA,AUTOMATIC,9
+11,2021 TYR Pro Swim Series - Indianapolis,"Indianapolis, IN",LCM,2021-05-12,2021-05-15,USA,AUTOMATIC,9
+12,2024 TYR Pro Swim Series - Westmont,"Westmont, IL",LCM,2024-03-06,2024-03-09,USA,AUTOMATIC,9
+13,2020 U.S. Olympic Team Trials Wave I,"Omaha, NE",LCM,2021-06-04,2021-06-07,USA,AUTOMATIC,10
+14,2020 U.S. Olympic Team Trials Wave II,"Omaha, NE",LCM,2021-06-13,2021-06-20,USA,AUTOMATIC,10
+15,2024 TYR Pro Swim Series,"San Antonio, TX",LCM,2024-04-10,2024-04-13,USA,AUTOMATIC,10
+16,European Aquatics Championships Belgrade 2024,Belgrade,LCM,2024-06-17,2024-06-23,SRB,AUTOMATIC,10
+17,U.S. Olympic Team Trials,"Indianapolis, IN",LCM,2024-06-15,2024-06-23,USA,AUTOMATIC,10
+18,2023 TYR Pro Swim Series - Fort Lauderdale,"Fort Lauderdale, FL",LCM,2023-03-01,2023-03-04,USA,AUTOMATIC,10
+19,2023 TYR Pro Series - Westmont,"Westmont, IL",LCM,2023-04-12,2023-04-15,USA,AUTOMATIC,10
+20,2023 Phillips 66 National Championships,"Indianapolis, IN",LCM,2023-06-27,2023-07-01,USA,AUTOMATIC,10
+21,World Aquatics Championships,Fukuoka,LCM,2023-07-23,2023-07-30,JPN,AUTOMATIC,10

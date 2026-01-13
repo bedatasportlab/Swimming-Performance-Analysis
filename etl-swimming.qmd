@@ -1,0 +1,1294 @@
+---
+title: "Análisis ETL: Ciclo Olímpico 2021-2024 en Natación"
+author:
+  - Alonso González Romero
+  - Daniel López Paredes
+  - Alba Martínez de la Hermosa
+date: today
+format:
+  html:
+    page-layout: full  
+    css: style.css
+    embed-resources: true
+    plotly-connected: true
+    toc: true
+    toc-depth: 3
+    number-sections: true
+lang: es
+---
+
+# Introducción {#introduccion}
+
+Este proyecto presenta un flujo de trabajo ETL (Extract, Transform, Load) aplicado a datos oficiales de competiciones internacionales de natación entre 2021 y 2024. La **fuente de datos** proviene de los registros oficiales de [Omega Timing](https://www.omegatiming.com/), que proporciona a través de archivos XML información referente a múltiples competiciones de nivel internacional (Europeos, Mundiales, Trials Americanos, TYR Pro Swim Series, entre otros).
+
+El **objetivo principal** del análisis es transformar los datos crudos en información procesable que permita responder preguntas clave sobre el rendimiento de los nadadores, tendencias temporales y comparativas entre diferentes competiciones.
+
+
+# Organización y Gestión del Proyecto
+
+Para la gestión del código se ha utilizado Git como herramienta de control de versiones y GitHub como plataforma de colaboración y compartición de código. El repositorio se estructura en carpetas para separar los datos crudos de las competiciones de natación, los datos procesados para su estructura en CSV, los scripts de ETL y la documentación del proyecto.
+
+Por otro lado, se ha utilizado Github Projects para la gestión de tareas y seguimiento del progreso del proyecto, elaborando un tablero *Kanban* con diferentes columnas:
+- To Do. Tareas pendientes por realizar.
+- In Progress. Tareas en desarrollo.
+- Done. Tareas finalizadas.
+
+Además para el desarrollo modular y concurrente de las diferentes funcionalidades del proyecto, se han establecido diferentes ramas en el repositorio:
+- `main`: Rama principal con la versión estable del proyecto.
+- `develop`: Rama de desarrollo donde se integran las nuevas funcionalidades antes de ser fusionadas a `main`.
+- `feature/nombre-funcionalidad`: Ramas específicas para el desarrollo de nuevas características o mejoras.
+
+Para cada issue creado en GitHub Projects, se le asigna un Pull Request (PR) asociado, que es revisado por al menos otro miembro del equipo antes de ser fusionado a la rama `develop` o `main`. Esto asegura la calidad del código y facilita la colaboración entre los miembros del equipo. En la @fig-kanban-projects se puede observar el tablero mencionado junto con los issues vinculados a cada tarea. Una vez completado el merge de la feature branch a develop o main, el issue se mueve a la columna Done junto con el PR cerrado.
+
+::: {#fig-kanban-projects}
+![](images/kanban-projects.png){width=80%}
+
+Tablero Kanban con issues gestionados en GitHub Projects.
+:::
+
+Por otro lado en cuanto a las funciones de cada miembro del proyecto han sido las siguientes:
+- Alba Martínez de la Hermosa: encargada de desarrollar el análisis de los datos y plantear preguntas y visualizaciones para extraer la máxima información de los datos.
+- Alonso González Romero: experto en el dominio del problema, encargado de la extracción de los datos, así como de la correcta visualización de los resultados.
+- Daniel López Paredes: encargado de las transformaciones en el proceso ETL y de la gestión del proyecto en GitHub mediante el uso de ramas, creación de issues, revisión de pull requests (PR), etc.
+
+Es importante destacar que todos los miembros del proyecto utilizan Git y Github para hacer commits, subir cambios al repositorio y crear ramas para cada funcionalidad desarrollada a lo largo del proyecto. Esto facilita la colaboración y el seguimiento de la evolución del proyecto.
+
+
+# Extracción de Datos
+
+## Importación de fuente de datos
+
+Como bien se ha adelantado en la sección Introducción, los datos han sido extraídos de los archivos XML oficiales proporcionados por Omega Timing. Tras un proceso previo de scraping y parseo de archivos XML, hemos consolidado la información en cuatro archivos CSV que conforman nuestra base de datos relacional:
+
+- `competiciones.csv`: Información sobre las competiciones cargadas.
+- `atletas.csv`: Detalles de los nadadores.
+- `clubes.csv`: Datos de los clubes/países.
+- `resultados.csv`: Resultados de las competiciones nadadas.
+
+A continuación, procedemos a la carga de estos archivos en el entorno de trabajo utilizando la librería `pandas` de Python y un manejo básico de errores para asegurar que los archivos se cargan correctamente:
+
+```{python}
+import pandas as pd
+import os
+
+BASE_PATH = 'data/processed_data/'
+
+path_atletas = f'{BASE_PATH}atletas.csv'
+path_clubes = f'{BASE_PATH}clubes.csv'
+path_competiciones = f'{BASE_PATH}competiciones.csv'
+path_resultados = f'{BASE_PATH}resultados.csv'
+
+# Carga de DataFrames
+try:
+    df_atletas = pd.read_csv(path_atletas)
+    df_clubes = pd.read_csv(path_clubes)
+    df_competiciones = pd.read_csv(path_competiciones)
+    df_resultados = pd.read_csv(path_resultados)
+    
+    print("Todos los archivos se han cargados correctamente.")
+except FileNotFoundError as e:
+    print(f"Error de carga: {e}")
+
+# Eliminamos las rutas de los archivos para no sobrecargar el entorno
+del path_atletas, path_clubes, path_competiciones, path_resultados, BASE_PATH
+```
+
+## Exploración inicial
+
+Una vez cargados los datos, realizamos una exploración inicial de cada DataFrame para entender su estructura, los tipos de datos y la integridad de los identificadores. Para sistematizar este proceso de exploración, hemos desarrollado las siguientes funciones: 
+
+- `explorar_estructura(df, nombre_df, filas=3)`: Muestra las dimensiones, tipos de datos y un ejemplo de las primeras N filas de la tabla. Si no se especifica la última variable, se muestran las primeras 3 filas por defecto.
+
+- `verificar_unicidad(df, col_id)`: Verifica si una columna específica actúa como identificador único (Clave Primaria).
+
+```{python}
+def explorar_estructura(df, nombre_df, filas=3):
+    """
+    Datos de entrada:
+    - df: DataFrame a explorar.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+    - filas: Número de filas a mostrar del DataFrame. (Integer, default=3)
+
+    Funcionalidad:
+    Muestra las dimensiones, tipos de datos y un ejemplo de las primeras filas.
+    """
+    print(f"### Estructura del dataset: {nombre_df}")
+    print(f"Dimensiones: {df.shape[0]} filas x {df.shape[1]} columnas")
+    
+    # Creamos un resumen rápido de tipos
+    print("\n--- Tipos de datos ---")
+    print(df.dtypes)
+
+    print(f"\n--- Primeras {filas} filas de {nombre_df} ---")
+    display(df.head(filas))
+    print("\n" + "="*50 + "\n")
+
+
+def verificar_unicidad(df, col_id, cols_entidad=None):
+    """
+    Datos de entrada:
+    - df: DataFrame a explorar.
+    - col_id: Nombre de la columna a verificar como identificador único. (String)
+    - cols_entidad (Opcional): Lista de columnas que definen a la entidad real 
+      (ej: ['nombre', 'apellidos', 'fecha_nacimiento']).
+    
+    Funcionalidad:
+    1. Verifica si col_id es único.
+    2. Si se provee cols_entidad, verifica si una misma entidad tiene múltiples IDs diferentes.
+    """
+    print(f"Verificando identificador '{col_id}':")
+    
+    try:
+        # 1. Verificación básica de ID (Tu código original)
+        serie = df[col_id]
+        if serie.is_unique:
+            print(f"La columna '{col_id}' es un identificador único (técnicamente).")
+        else:
+            total = len(df)
+            unicos = serie.nunique()
+            print(f"La columna '{col_id}' NO es única. Tiene {unicos} valores únicos de {total} registros.")
+
+        # 2. Verificación de Integridad de Entidad (Nueva funcionalidad)
+        if cols_entidad:
+            print(f"   ↳ Analizando duplicidad lógica en: {cols_entidad}...")
+            
+            # Agrupamos por los datos de la persona y contamos cuántos IDs únicos tiene cada una
+            duplicidad = df.groupby(cols_entidad)[col_id].nunique()
+            
+            # Filtramos aquellos que tengan más de 1 ID asociado
+            casos_problematicos = duplicidad[duplicidad > 1]
+            
+            if len(casos_problematicos) > 0:
+                print(f"¡ALERTA! Se encontraron {len(casos_problematicos)} personas/entidades con MÚLTIPLES IDs distintos.")
+                print(f"      Ejemplo: {casos_problematicos.index[0]} tiene {casos_problematicos.iloc[0]} IDs diferentes.")
+            else:
+                print(f"Integridad correcta: Cada persona (combinación de campos) tiene un solo ID asignado.")
+
+    except KeyError as e:
+        # Detecta si falla el ID o las columnas de entidad
+        print(f"ERROR DE ACCESO: Alguna columna no existe en el DataFrame. Detalle: {e}")
+        
+    except Exception as e:
+        print(f"ERROR INESPERADO: {e}")
+
+    finally:
+        print("-" * 30)
+
+```
+
+### Atletas
+
+Comenzamos con el DataFrame `df_atletas`, que contiene información sobre los nadadores. Analizamos primeramente su estructura:
+
+```{python}
+explorar_estructura(df_atletas, 'ID', filas=5)
+```
+
+Se puede observar que el DataFrame `df_atletas` tiene 4,710 filas y 5 columnas. Para cada nadador, se registra su identificador (`ID`), su nombre (`NOMBRE`), sus apellidos (`APELLIDOS`), su fecha de nacimiento (`birthday`) y su género (`género`).
+
+Verificamos si la columna `ID` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_atletas, 'ID', ['NOMBRE', 'APELLIDOS', 'birthday', 'género'])
+```
+
+
+Por lo tanto, podemos concluir que en el DataFrame `df_atletas`, la columna `ID` actúa como clave primaria pero hay atletas que tienen asignado el mismo ID. 
+
+### Clubes
+
+Procedemos de manera similar con el Dataframe `df_clubes`, que contiene información sobre los clubes o países a los que pertenecen los nadadores. 
+
+```{python}
+explorar_estructura(df_clubes, 'Clubes')
+```
+
+El DataFrame `df_clubes` tiene 1013 filas y 3 columnas. Cada registro contiene el identificador del club (`club_code`), el nombre del club o país (`club_name`) y su código internacional (`club_nation`). Podemos observar que los club_code y club_nation contienen el nombre con 3 letras del país. 
+
+Verificamos si la columna `club_code` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_clubes, 'club_code')
+```
+
+Por lo tanto, podemos concluir que en el DataFrame `df_clubes`, la columna `club_code` actúa como clave primaria y no hay errores en la carga.
+
+### Competiciones
+
+Procedemos de manera similar con el Dataframe `df_competiciones`, que contiene información sobre las competiciones de natación.
+
+```{python}
+explorar_estructura(df_competiciones, 'Competiciones')
+```
+
+El DataFrame `df_competiciones` tiene 21 filas y 9 columnas. Cada registro contiene el identificador de la competición (`ID`), el nombre de la competición (`nombre`), la ciudad donde se celebró (`ciudad`), el tipo de piscina (`tipo_piscina`), el país (`pais`) y las fechas de inicio y fin (`fecha_inicio`, `fecha_fin`), el tipo de cronometraje (`cronometraje`) y el número de calles (`numeroCalles`).
+
+Verificamos si la columna `ID` es un identificador único para este DataFrame:
+
+```{python}
+verificar_unicidad(df_competiciones, 'ID')
+```
+
+Por lo tanto, podemos concluir que en el DataFrame `df_competiciones`, la columna `ID` actúa como clave primaria y no hay errores en la carga.
+
+
+### Resultados
+
+Procedemos de manera similar con el Dataframe `df_resultados`, que contiene información sobre los resultados de las competiciones.
+
+```{python}
+explorar_estructura(df_resultados, 'Resultados', 5)
+```
+
+Se observa que el DataFrame `df_resultados` tiene 179696 filas y 13 columnas. Cada registro contiene variables significantes para los resultados como el identificador de la competición (`id_competicion`), el identificador del nadador (`id_atleta`), el identificador del club o país (`club_code`), y datos sobre la prueba nadada, la ronda, el tiempo realizado, la fecha y hora a la que nadó, entre otros. Cabe destacar el formato en el que se presentan los resultados, ya que, por cada parcial que nadó el nadador, se genera un registro independiente en el DataFrame. Es por ello que, como se puede observar, las 2 primeras filas del DataFrame corresponden al resultado del nadador con id 16422 en el 100 BREAST de la ronda PRE, donde la primera fila contiene información sobre el paso por el primer parcial (50m) y la segunda fila contiene el tiempo acumulado en el paso por el segundo y último parcial (100m). 
+
+# Pre-procesamiento
+
+Tras la exploración inicial de los datos, procedemos a la fase de pre-procesamiento, donde vamos a realizar las siguientes tareas: 
+
+- Correción de errores de consistencia en los ID's de atletas
+- Tratamiento de tipos de datos en las columnas
+- Manejo de valores nulos
+- Transformación de fechas
+- Transformaciones de texto
+- Creación de variables derivadas
+
+## Funciones Auxiliares
+
+Para llevar a cabo el pre-procesamiento de manera sistemática y reutilizable, hemos desarrollado las siguientes funciones:
+
+- `consolidar_ids_nadadores(df_atletas, df_resultados, col_id, col_id_2, cols_entidad)`: Unifica nadadores que tienen múltiples IDs basándose en sus datos de nombre, apellido etc...
+- `verificar_nulos(df, nombre_df)`: Detecta y cuantifica valores faltantes en cada columna.
+- `cambiar_tipos_datos(df, mapeo_tipos)`: Convierte tipos de datos según un diccionario especificado.
+- `limpiar_espacios_blancos(df)`: Elimina espacios en blanco al inicio y final de valores texto.
+- `transformar_fechas(df, columnas_fechas, columna_hora)`: Convierte columnas de fecha (y hora opcionalmente) a formato datetime.
+- `mostrar_resumen_preprocesamiento(df, nombre_df)`: Muestra un resumen del estado del DataFrame tras el pre-procesamiento.
+
+```{python}
+def consolidar_ids_nadadores(df_atletas, df_resultados, col_id, col_id_2, cols_entidad):
+    """
+    Unifica nadadores que tienen múltiples IDs basándose en sus datos personales.
+    
+    Retorna:
+    - df_atletas_limpio: DataFrame sin los IDs duplicados (filas eliminadas).
+    - df_resultados_corregido: DataFrame con los IDs antiguos reemplazados por el unificado.
+    """
+    df_a_new = df_atletas.copy()
+    df_r_new = df_resultados.copy()
+    
+    print("--- Iniciando consolidación de IDs ---")
+
+
+    grupos = df_a_new.groupby(cols_entidad)[col_id].unique()
+    duplicados = grupos[grupos.apply(lambda x: len(x) > 1)]
+    
+    mapa_cambios = {}
+    ids_a_eliminar = []
+    
+    if len(duplicados) == 0:
+        print("No se encontraron duplicados. No hay cambios que hacer.")
+        return df_a_new, df_r_new
+
+    print(f"Se encontraron {len(duplicados)} nadadores con múltiples IDs. Unificando...")
+
+    for ids in duplicados:
+        ids_ordenados = sorted(ids)
+        id_superviviente = ids_ordenados[0]
+        ids_sacrificables = ids_ordenados[1:]
+        
+        for id_malo in ids_sacrificables:
+            mapa_cambios[id_malo] = id_superviviente
+            ids_a_eliminar.append(id_malo)
+
+    n_cambios = df_r_new[col_id_2].isin(mapa_cambios.keys()).sum()
+    df_r_new[col_id_2] = df_r_new[col_id_2].replace(mapa_cambios)
+    
+    print(f"Se han actualizado {n_cambios} registros en la tabla de resultados.")
+
+    total_antes = len(df_a_new)
+    df_a_new = df_a_new[~df_a_new[col_id].isin(ids_a_eliminar)]
+    total_despues = len(df_a_new)
+    
+    print(f"Se han eliminado {total_antes - total_despues} perfiles duplicados en la tabla de atletas.")
+    print("-" * 30)
+    return df_a_new, df_r_new
+
+def verificar_nulos(df, nombre_df):
+    """
+    Datos de entrada:
+    - df: DataFrame a analizar.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+
+    Funcionalidad:
+    Detecta y cuantifica valores nulos/faltantes en cada columna del DataFrame.
+    """
+    print(f"### Análisis de Valores Nulos: {nombre_df}")
+    
+    nulos_por_columna = df.isnull().sum()
+    porcentaje_nulos = (df.isnull().sum() / len(df)) * 100
+    
+    if nulos_por_columna.sum() == 0:
+        print("No se detectaron valores nulos en el DataFrame.")
+    else:
+        resumen_nulos = pd.DataFrame({
+            'Columna': nulos_por_columna.index,
+            'Cantidad': nulos_por_columna.values,
+            'Porcentaje': porcentaje_nulos.values
+        })
+        resumen_nulos = resumen_nulos[resumen_nulos['Cantidad'] > 0].sort_values('Cantidad', ascending=False)
+        print(resumen_nulos.to_string(index=False))
+    
+    print("-" * 50)
+
+def cambiar_tipos_datos(df, mapeo_tipos):
+    """
+    Datos de entrada:
+    - df: DataFrame a transformar.
+    - mapeo_tipos: Diccionario con columnas y sus tipos destino. (Dict)
+
+    Funcionalidad:
+    Convierte el tipo de datos de las columnas especificadas.
+    """
+    print("### Conversión de Tipos de Datos")
+    
+    for columna, tipo in mapeo_tipos.items():
+        if columna in df.columns:
+            try:
+                df[columna] = df[columna].astype(tipo)
+                print(f"✓ Columna '{columna}' convertida a {tipo.__name__}")
+            except Exception as e:
+                print(f"✗ Error al convertir '{columna}': {e}")
+        else:
+            print(f"⚠ Columna '{columna}' no encontrada en el DataFrame.")
+    
+    print("-" * 50)
+    return df
+
+def limpiar_espacios_blancos(df):
+    """
+    Datos de entrada:
+    - df: DataFrame a limpiar.
+
+    Funcionalidad:
+    Elimina espacios en blanco al inicio y final de valores de texto.
+    """
+    print("### Limpieza de Espacios en Blanco")
+    
+    columnas_procesadas = 0
+    for columna in df.select_dtypes(include=['object']).columns:
+        df[columna] = df[columna].str.strip()
+        columnas_procesadas += 1
+    
+    print(f"Se procesaron {columnas_procesadas} columnas de tipo texto.")
+    print("-" * 50)
+    return df
+
+def transformar_fechas(df, columnas_fechas, columna_hora=None):
+    """
+    Datos de entrada:
+    - df: DataFrame a transformar.
+    - columnas_fechas: Lista de columnas a convertir a datetime. (List)
+    - columna_hora: (Opcional) Columna con hora para combinar con la primera fecha. (String)
+
+    Funcionalidad:
+    Convierte columnas especificadas al formato datetime.
+    Si se proporciona columna_hora, combina fecha + hora en una nueva columna 'fecha_hora'.
+    """
+    print("### Transformación de Fechas")
+    
+    for columna in columnas_fechas:
+        if columna in df.columns:
+            try:
+                df[columna] = pd.to_datetime(df[columna], errors='coerce')
+                print(f"✓ Columna '{columna}' convertida a datetime")
+            except Exception as e:
+                print(f"✗ Error al convertir '{columna}': {e}")
+        else:
+            print(f"⚠ Columna '{columna}' no encontrada.")
+    
+    # Si se proporciona una columna de hora, combinar fecha + hora
+    if columna_hora and columna_hora in df.columns and len(columnas_fechas) > 0:
+        columna_fecha = columnas_fechas[0]
+        if columna_fecha in df.columns:
+            try:
+                df['fecha_hora'] = pd.to_datetime(
+                    df[columna_fecha].astype(str) + ' ' + df[columna_hora].astype(str),
+                    format='%Y-%m-%d %H:%M:%S',
+                    errors='coerce'
+                )
+                print(f"✓ Columna 'fecha_hora' creada combinando '{columna_fecha}' y '{columna_hora}'")
+            except Exception as e:
+                print(f"✗ Error al combinar fecha y hora: {e}")
+    
+    print("-" * 50)
+    return df
+
+def mostrar_resumen_preprocesamiento(df, nombre_df):
+    """
+    Datos de entrada:
+    - df: DataFrame procesado.
+    - nombre_df: Nombre descriptivo del DataFrame. (String)
+
+    Funcionalidad:
+    Muestra un resumen del estado actual del DataFrame.
+    """
+    print(f"### Resumen Post-Procesamiento: {nombre_df}")
+    print(f"Dimensiones: {df.shape[0]} filas x {df.shape[1]} columnas")
+    print(f"Valores nulos totales: {df.isnull().sum().sum()}")
+    print("\n--- Tipos de datos ---")
+    print(df.dtypes)
+    print("\n" + "="*50 + "\n")
+```
+
+## Consolidación de IDs de atletas
+
+```{python}
+# Definimos qué columnas hacen única a una persona
+cols_persona = ['NOMBRE', 'APELLIDOS', 'birthday', 'género']
+
+# Ejecutamos la función y SOBRESCRIBIMOS las variables antiguas con las nuevas versiones
+df_atletas, df_resultados = consolidar_ids_nadadores(
+    df_atletas, 
+    df_resultados, 
+    'ID',
+    'id_atleta', 
+    cols_persona
+)
+
+```
+
+## Tratamiento de Tipos de Datos
+
+Comenzamos transformando los tipos de datos de las columnas para asegurar que cada variable tiene el formato adecuado para análisis posterior.
+
+### Atletas
+
+```{python}
+# Definimos el mapeo de tipos para df_atletas
+tipos_atletas = {
+    'ID': int,
+    'NOMBRE': str,
+    'APELLIDOS': str,
+    'birthday': str,  # Convertiremos a datetime en el siguiente paso
+    'género': str
+}
+
+df_atletas = cambiar_tipos_datos(df_atletas, tipos_atletas)
+```
+
+### Clubes
+
+```{python}
+# Definimos el mapeo de tipos para df_clubes
+tipos_clubes = {
+    'club_code': str,
+    'club_name': str,
+    'club_nation': str
+}
+
+df_clubes = cambiar_tipos_datos(df_clubes, tipos_clubes)
+```
+
+### Competiciones
+
+```{python}
+# Definimos el mapeo de tipos para df_competiciones
+tipos_competiciones = {
+    'ID': int,
+    'nombre': str,
+    'ciudad': str,
+    'tipo_piscina': str,
+    'pais': str,
+    'fecha_inicio': str,  # Convertiremos a datetime después
+    'fecha_fin': str,     # Convertiremos a datetime después
+    'cronometraje': str,
+    'numeroCalles': int
+}
+
+df_competiciones = cambiar_tipos_datos(df_competiciones, tipos_competiciones)
+```
+
+### Resultados
+
+```{python}
+# Definimos el mapeo de tipos para df_resultados
+tipos_resultados = {
+    'id_competicion': int,
+    'id_atleta': int,
+    'club_code': str,
+    'distancia': int,
+    'estilo': str,
+    'ronda': str,
+    'tiempo_final': str,  # Lo transformaremos en la sección de transformaciones
+    'descalificado?': str,
+    'puntos': int,
+    'distancia_parcial': int,
+    'tiempo_acumulado': str,
+    'fecha': str,  # Convertiremos a datetime después
+    'hora': str    # Convertiremos a datetime después
+}
+
+df_resultados = cambiar_tipos_datos(df_resultados, tipos_resultados)
+```
+
+
+## Manejo de Valores Nulos
+
+Realizamos un análisis exhaustivo de valores faltantes en cada DataFrame y decidimos cómo tratarlos.
+
+### Atletas
+
+```{python}
+verificar_nulos(df_atletas, 'Atletas')
+```
+
+### Clubes
+
+```{python}
+verificar_nulos(df_clubes, 'Clubes')
+```
+
+### Competiciones
+
+```{python}
+verificar_nulos(df_competiciones, 'Competiciones')
+```
+
+### Resultados
+
+```{python}
+verificar_nulos(df_resultados, 'Resultados')
+```
+
+Analizando los datos faltantes, se identifican 2 variables con valores de este tipo: 
+
+- Puntos: Hace referencia a los puntos FINA conseguidos y asignados a su tiempo final. La ausencia de este dato tiene naturaleza mixta, por un lado, aquellos nadadores descalificados, no obtienen puntos, asignándose el valor faltante a esa variable. Por otro lado, una gran parte de los nulos restantes se deben a que ciertas competiciones registradas simplemente no calcularon este dato y no lo registraron. 
+
+- distancia_parcial: Valores nulos en la distancia parcial para aquellos nadadores que no tienen valores de parcial. Son nadadores descalificados que no llegaron a completar una parte de la prueba, es por ello que dicha variable tiene datos faltantes.
+
+## Limpieza de Espacios en Blanco
+
+Aseguramos la eliminación de posibles espacios en blanco superfluos en las columnas de texto de todos los DataFrames.
+
+```{python}
+df_atletas = limpiar_espacios_blancos(df_atletas)
+df_clubes = limpiar_espacios_blancos(df_clubes)
+df_competiciones = limpiar_espacios_blancos(df_competiciones)
+df_resultados = limpiar_espacios_blancos(df_resultados)
+```
+
+## Transformación de Fechas
+
+Convertimos las columnas de fechas al formato `datetime` para facilitar análisis temporales.
+
+### Atletas
+
+```{python}
+# Convertimos la fecha de nacimiento
+df_atletas = transformar_fechas(df_atletas, ['birthday'])
+
+# Renombramos la columna para mayor claridad
+df_atletas.rename(columns={'birthday': 'fecha_nacimiento'}, inplace=True)
+```
+
+### Competiciones
+
+```{python}
+# Convertimos las fechas de inicio y fin de las competiciones
+df_competiciones = transformar_fechas(df_competiciones, ['fecha_inicio', 'fecha_fin'])
+```
+
+### Resultados
+
+```{python}
+# Convertimos la fecha y hora de los resultados
+df_resultados = transformar_fechas(df_resultados, ['fecha'], columna_hora='hora')
+```
+
+Al disponer de la fecha y hora, la función nos devuelve el datetime completo en la columna `fecha_hora`.
+
+## Transformaciones de Texto
+
+Realizamos transformaciones en variables de texto para estandarizarlas y mejorar su calidad.
+
+### Normalización de Géneros
+
+```{python}
+
+# Verificamos valores únicos antes de la transformación
+print(f"Valores únicos en 'género': {df_atletas['género'].unique()}")
+
+# Estandarizamos los valores (Hombre/Mujer, H/M, etc.)
+df_atletas['género'] = df_atletas['género'].str.upper()
+df_atletas['género'] = df_atletas['género'].replace({
+    'M': 'HOMBRE',
+    'F': 'MUJER',
+    'MALE': 'HOMBRE',
+    'FEMALE': 'MUJER'
+})
+
+print(f"Valores normalizados: {df_atletas['género'].unique()}")
+print("-" * 50)
+```
+
+Como los valores para género son únicos y correctos (no existen valores diferentes o en minúsculas), no es necesario realizar ninguna transformación adicional.
+
+### Normalización de Pruebas y Rondas
+
+```{python}
+print("### Normalización de Pruebas y Rondas")
+
+# Convertimos a mayúsculas para estandarización
+df_resultados['estilo'] = df_resultados['estilo'].str.upper()
+df_resultados['ronda'] = df_resultados['ronda'].str.upper()
+
+print(f"Pruebas únicas (primeras 10): {df_resultados['estilo'].unique()[:10]}")
+print(f"Rondas únicas: {df_resultados['ronda'].unique()}")
+print("-" * 50)
+```
+
+Se asegura la unicidad de los valores en las columnas `estilo` y `ronda` tras la normalización transformando las cadenas de texto en mayúsculas.
+
+## Creación de Variables Derivadas
+
+Creamos nuevas variables que serán útiles para el análisis posterior.
+
+### Duración de Competiciones
+
+```{python}
+print("### Creación de Variable: Duración de Competiciones")
+
+# Calculamos la duración en días de cada competición
+df_competiciones['duracion_dias'] = (df_competiciones['fecha_fin'] - df_competiciones['fecha_inicio']).dt.days + 1
+
+print(f"Duración mínima: {df_competiciones['duracion_dias'].min()} días")
+print(f"Duración máxima: {df_competiciones['duracion_dias'].max()} días")
+print(f"Duración promedio: {df_competiciones['duracion_dias'].mean():.1f} días")
+print("-" * 50)
+```
+
+### Parseo de Tiempos
+
+```{python}
+def parse_resultados_temporal(df):
+    # trabajar sobre copia
+    df = df.copy()
+    # Normalizar separador decimal en las columnas de tiempo (si hubiera comas)
+    df['tiempo_final'] = df['tiempo_final'].astype(str).str.replace(',', '.', regex=False)
+    df['tiempo_acumulado'] = df.get('tiempo_acumulado', pd.Series(dtype=str)).astype(str).str.replace(',', '.', regex=False)
+
+    # Combinar fecha + hora -> datetime (ajusta format si tu formato difiere)
+    df['fecha_hora'] = pd.to_datetime(
+        df['fecha'].astype(str) + ' ' + df['hora'].astype(str),
+        format='%Y-%m-%d %H:%M',
+        errors='coerce'
+    )
+
+    # Convertir tiempos "HH:MM:SS.ss" a Timedelta y después a segundos (float)
+    df['tiempo_final_td'] = pd.to_timedelta(df['tiempo_final'], errors='coerce')
+    df['tiempo_final_seg'] = df['tiempo_final_td'].dt.total_seconds()
+
+    if 'tiempo_acumulado' in df.columns:
+        df['tiempo_acumulado_td'] = pd.to_timedelta(df['tiempo_acumulado'], errors='coerce')
+        df['tiempo_acumulado_seg'] = df['tiempo_acumulado_td'].dt.total_seconds()
+
+    # Extracción de variables temporales (evitar acentos en nombres de columna)
+    df['anio_competicion'] = df['fecha_hora'].dt.year
+    df['mes_competicion'] = df['fecha_hora'].dt.month
+    df['dia_semana'] = df['fecha_hora'].dt.day_name()
+
+    return df
+
+# Aplicamos la función a la columna de tiempos
+df_resultados = parse_resultados_temporal(df_resultados)
+
+print(f"Tiempos convertidos exitosamente")
+print(f"Tiempo mínimo final: {df_resultados['tiempo_final_seg'].min():.2f} segundos")
+print(f"Tiempo máximo final: {df_resultados['tiempo_final_seg'].max():.2f} segundos")
+print(f"Tiempos finales faltantes: {df_resultados['tiempo_final_seg'].isnull().sum()}")
+
+print(f"Tiempo mínimo acumulado: {df_resultados['tiempo_acumulado_seg'].min():.2f} segundos")
+print(f"Tiempo máximo acumulado: {df_resultados['tiempo_acumulado_seg'].max():.2f} segundos")
+print(f"Tiempos acumulados faltantes: {df_resultados['tiempo_acumulado_seg'].isnull().sum()}")
+print("-" * 50)
+```
+
+### Extracción de Información Temporal
+
+```{python}
+print("### Extracción de Variables Temporales")
+
+# Extraemos el año de las competiciones
+df_resultados['anio_competicion'] = df_resultados['fecha'].dt.year
+df_resultados['mes_competicion'] = df_resultados['fecha'].dt.month
+df_resultados['dia_semana'] = df_resultados['fecha'].dt.day_name()
+
+# Extraemos también de las competiciones
+df_competiciones['anio'] = df_competiciones['fecha_inicio'].dt.year
+
+print(f"Años en competiciones: {sorted(df_competiciones['anio'].unique())}")
+print(f"Meses representados: {sorted(df_resultados['mes_competicion'].unique())}")
+print("-" * 50)
+```
+
+## Resumen Post-Procesamiento
+
+Finalmente, mostramos un resumen del estado de cada DataFrame tras todas las transformaciones realizadas.
+
+### Atletas
+
+```{python}
+mostrar_resumen_preprocesamiento(df_atletas, 'Atletas')
+```
+
+Tanto la variable `ID` como la variable `edad` se han convertido a tipo entero (`int`), mientras que la variable `fecha_nacimiento` se ha convertido a tipo fecha (`datetime`). Además, no se han detectado valores nulos en este DataFrame tras el pre-procesamiento.
+
+### Clubes
+
+```{python}
+mostrar_resumen_preprocesamiento(df_clubes, 'Clubes')
+```
+
+El DataFrame `df_clubes` mantiene las mismas columnas y tipos de datos dado que todas sus columnas son cadenas de carácteres. Tampoco no se han detectado valores nulos tras el pre-procesamiento.
+
+### Competiciones
+
+```{python}
+mostrar_resumen_preprocesamiento(df_competiciones, 'Competiciones')
+```
+
+En el DataFrame `df_competiciones` se han visto transformadas las columnas `fecha_inicio` y `fecha_fin` a tipo fecha (`datetime`), y se ha añadido la columna derivada `duracion_dias` de tipo entero (`int`) y la columna `anio` de tipo entero también. También se han transformado a entero las columnas `ID` y `numeroCalles`. No se han detectado valores nulos tras el pre-procesamiento.
+
+### Resultados
+
+```{python}
+mostrar_resumen_preprocesamiento(df_resultados, 'Resultados')
+```
+
+Por último, en el Dataframe de resultados, se han convertido las columnas `id_competicion`, `id_atleta`, `puntos` y distancia parcial a tipo entero (`int`). Además, se han añadido varias columnas derivadas: `fecha_hora` de tipo fecha (`datetime`) de las columnas `fecha` y `hora`, `tiempo_final_seg` y `tiempo_acumulado_seg` de tipo flotante (`float`), y las columnas `anio_competicion`, `mes_competicion` y `dia_semana`. También se han añadido las columnas `tiempo_acumulado_td` y `tiempo_final_td` de tipo `timedelta` por si fuera necesario.
+
+# Procesamiento y Análisis
+
+Teniendo los conjuntos de datos ordenados, se procede a realizar operaciones que permitan combinarlos para poder hacer los análisis y obtener métricas interesantes para el rendimiento.
+
+## Operaciones de join
+
+### Atletas con sus resultados
+
+En esta primera operación se quieren juntar los resultados de los atletas en cada competición en el que han participado con sus datos personales:
+
+El *df_atletas* se junta con *df_resultados* para obtener una fila por cada resultado en *resultados_atletas*. Es decir, cada atleta tendrá tantas filas como resultados en las distintas competiciones de cada año. 
+
+Todos los resultados tienen algún atleta asociado. Sin embargo, puede haber algún atleta que no tenga todos los resultados registrados. Para no perder la información de ningún atleta se utiliza el *left join*.
+
+```{python}
+resultados_atletas = pd.merge(
+    df_resultados,     
+    df_atletas,        
+    left_on='id_atleta', 
+    right_on='ID', 
+    how='left'         
+)
+
+#Comprobar resultados
+print("Resultados de los atletas por prueba y competición:")
+print(resultados_atletas[['NOMBRE', 'APELLIDOS', 'fecha_nacimiento', 'género', 'distancia', 'estilo', 'ronda', 'tiempo_final', 'descalificado?', 'puntos']])
+```
+
+### Clubes por competición
+
+En esta segunda operación se busca juntar en una tabla todos los clubes que han participado en cada competición.
+
+Para ello se juntan *resultados_atletas* (tiene el id de la competición y el código del club), *df_competiciones* (tiene el id de la competición y el nombre de la competición) y *df_clubes* (tiene el código del club y el nombre del club).
+
+Se empieza haciendo un join entre *resultados_atletas* y *df_competiciones* en base al id de la competición. Se crea un df intermedio llamado *competiciones_clubes_sin_nombre*. A este df se le une *df_clubes* en base al código del club. El resultado es un df llamado *clubes_competicion_ampliado* en el que hay una fila por cada atleta que ha participado en cada competición representando a su club.
+
+En los dos merges se utiliza *outer join* para mantener la información de todas las filas de las tres tablas en caso de que hubiera inconsistencias.
+
+```{python}
+competiciones_clubes_sin_nombre = pd.merge(resultados_atletas, df_competiciones, right_on='ID',left_on='id_competicion', how='outer')
+
+clubes_competicion_ampliado = pd.merge(competiciones_clubes_sin_nombre, df_clubes, on='club_code', how='outer')
+
+#Comprobar resultados
+print("Representación de los clubes participantes por competición:")
+print(clubes_competicion_ampliado[['id_competicion', 'id_atleta', 'club_code', 'club_name', 'nombre', 'anio', 'ciudad']].head(10))
+```
+
+```{python}
+# Se borra el df intermedio para no sobrecargar
+del competiciones_clubes_sin_nombre
+```
+
+## Operaciones de groupby
+
+### Estadísticas de participación en competiciones por club
+
+El dataframe *clubes_competicion_ampliado* tiene una fila por cada participación del atleta que representa a su club en una competición. Es decir, si en un campeonato un nadador ha realizado 3 pruebas distintas, habrá tres filas distitntas.
+
+En esta primera operación de groupby se busca obtener un dataframe en el que haya una fila por cada atleta que haya participado en una competición determinada, independientemente del número de pruebas en el que tenga un resultado registrado.
+
+A partir de ahí se hará un conteo para identificar cuántos atletas distintos han representado a un club en una competición determinada.
+
+```{python}
+representacion_clubes_competicion = clubes_competicion_ampliado.groupby(
+    ['id_competicion', 'club_code'], as_index = False).agg({
+'id_atleta': 'nunique', #contar cuántos atletas distintos hay de cada club
+'club_name': 'first', #estando ya agrupados y habiendo contado los atletas distintos, se pone la primera vez que aparece el nombre de cada club (en las siguientes: de cada competición, su año y su lugar de realización)
+'nombre': 'first',
+'anio': 'first',
+'ciudad': 'first'
+})
+
+#Renombrar columna
+representacion_clubes_competicion = representacion_clubes_competicion.rename(
+    columns={'id_atleta': 'atletas_distintos'}
+)
+
+print(representacion_clubes_competicion[['atletas_distintos', 'club_code', 'club_name', 'nombre', 'anio', 'ciudad']].head(10))
+```
+
+### Ranking de participación
+
+A partir de aquí se puede encontrar el club con mayor representación en una competición y crear un ranking con los clubes que mayor paricipación han tenido:
+
+```{python}
+maxima_participacion = representacion_clubes_competicion.loc[representacion_clubes_competicion["atletas_distintos"].idxmax()]
+print(f"El club con más participación ha sido: {maxima_participacion['club_name']} - {maxima_participacion['atletas_distintos']} nadadores.")
+
+maxima_participacion = representacion_clubes_competicion.sort_values(by="atletas_distintos", ascending = False)
+print(maxima_participacion.head(10))
+```
+
+### Estadísticas de competición por atleta
+
+En esta segunda operación de groupby se calculan las estadísticas de competición para cada atleta:
+
+- El número de competiciones distintas en las que han participado. 
+- El número de veces que han competido en cada año (contado con todas las rondas de cada competición).
+- El número de temporadas que han completado.
+
+```{python}
+estadisticas_atleta_competicion = (resultados_atletas
+    .groupby("ID")
+    .agg({
+    "NOMBRE": "first",
+    "APELLIDOS": "first",
+    "fecha_nacimiento": "first",
+    "género": "first",
+    "id_competicion" : "nunique",
+    "ronda": 'nunique',
+    "anio_competicion": "nunique"
+    })
+)
+
+#Renombrar columnas
+estadisticas_atleta_competicion = estadisticas_atleta_competicion.rename(
+    columns={'id_competicion': 'num_comp_realizadas',
+    'ronda':'total_carreras_realizadas',
+    'anio_competicion': 'num_temp_realizadas'}
+)
+
+print(estadisticas_atleta_competicion.head(10))
+```
+
+### Estadísticas de competición por temporada y atleta
+
+A continuación se calculan las mismas estadísticas que se han presentado en el apartado anterior agrupándolas por temporada:
+
+```{python}
+estadisticas_atleta_temporada = (resultados_atletas
+    .groupby(["ID", "anio_competicion"])
+    .agg({
+    "NOMBRE": "first",
+    "APELLIDOS": "first",
+    "fecha_nacimiento": "first",
+    "género": "first",
+    "id_competicion" : "nunique",
+    "ronda": 'nunique',
+    })
+    .assign(competiciones_por_anio=lambda x: x["id_competicion"])
+)
+
+#Renombrar columnas
+estadisticas_atleta_temporada = estadisticas_atleta_temporada.rename(
+    columns={'id_competicion': 'num_comp_realizadas',
+    'ronda':'total_carreras_realizadas'}
+)
+
+print(estadisticas_atleta_temporada.head(10))
+```
+
+### Estadísticas de rendimiento por atleta
+
+En este apartado se definen las siguientes métricas que perfilarán al nadador según su especialidad (distancia y estilo) y su rendimiento:
+- Número de veces que ha alcanzado una final.
+- En cuántos estilos es especialista y cuáles son.
+- En qué disciplina ha llegado más veces a una final.
+
+```{python}
+#Definir disciplina y crear una columna
+resultados_atletas["disciplina"] = (resultados_atletas["distancia"]).astype(str) + "m " + resultados_atletas["estilo"]
+
+#Reordenar columna
+cols = resultados_atletas.columns.tolist()
+pos = cols.index("estilo") + 1
+cols.insert(pos, cols.pop(cols.index("disciplina")))
+resultados_atletas = resultados_atletas[cols]
+```
+
+```{python}
+# Filtrar finales
+finales = resultados_atletas[resultados_atletas["ronda"] == "FIN"]
+
+estadisticas_rendimiento = resultados_atletas.groupby("ID").agg(
+    NOMBRE=("NOMBRE", "first"),
+    APELLIDOS=("APELLIDOS", "first"),
+    fecha_nacimiento=("fecha_nacimiento", "first"),
+    género=("género", "first"),
+    total_finales=("ronda", lambda x: (x == "FIN").sum()),
+    num_estilos=("estilo", "nunique"),
+    estilos=("estilo", lambda x: list(sorted(x.unique())))
+).reset_index()
+
+# Añadir disciplina con más finales
+disciplina_top = finales.groupby("ID")["disciplina"].agg(lambda x: x.mode()[0] if len(x) > 0 else None).reset_index()
+estadisticas_rendimiento = estadisticas_rendimiento.merge(disciplina_top, on="ID", how="left")
+```
+
+## Cálculo de métricas
+
+En esta sección se realiza el cálculo de 2 nuevas métricas: 
+
+1. Cálculo de la posición de cada atleta en la prueba nadada. 
+2. Porcentaje de Mejora: Calcularemos cuánto ha mejorado en % un nadador su tiempo desde su primera vez que nadó hasta su mejor marca personal en el ciclo. 
+
+Para la primera métrica, vamos a realizar el cálculo en el dataframe creado anteriormente, `resultados_atletas`. Para ello, vamos a agrupar por competición, estilo, distancia, ronda y género. Además, asignaremos la misma posición a empates, por lo que usamos el método 'min' al rankear.
+
+Para la segunda métrica, vamos a recoger primero por atleta y disciplina, sus tiempos máximo y mínimo del ciclo olímpico. Tras ello, calculamos el porcentaje de mejora y luego realizamos un merge con el dataframe con el objetivo de tener dicho porcentaje de mejora. 
+
+
+```{python}
+# 1. Cálculo de la posición (Ranking)
+resultados_atletas['posicion'] = (
+    resultados_atletas.groupby(['id_competicion', 'distancia', 'estilo', 'ronda', 'género'])['tiempo_final_seg']
+    .rank(method='min', ascending=True)
+)
+print("Ejemplo de posiciones calculadas:")
+display(resultados_atletas[['id_competicion', 'disciplina', 'ronda', 'tiempo_final', 'posicion']].head())
+
+
+# 2. Porcentaje de Mejora
+mejora_df = resultados_atletas.groupby(['ID', 'disciplina'])['tiempo_final_seg'].agg(['max', 'min']).reset_index()
+mejora_df['porcentaje_mejora'] = ((mejora_df['max'] - mejora_df['min']) / mejora_df['max']) * 100
+
+# Unimos esta métrica al df de rendimiento anterior
+df_atletas = df_atletas.merge(
+    mejora_df.groupby('ID')['porcentaje_mejora'].mean().reset_index(), # Promedio de mejora en todas sus disciplinas
+    on='ID', 
+    how='left'
+)
+df_atletas.rename(columns={'porcentaje_mejora': 'promedio_mejora_global'}, inplace=True)
+```
+
+
+
+# Análisis y Visualizaciones
+
+En esta etapa, utilizaremos la librería plotly para generar gráficos interactivos que nos permitan inspeccionar a través de los datos. 
+
+```{python}
+import plotly.express as px
+import plotly.graph_objects as go
+
+template_design = "plotly_white"
+```
+
+## Análisis de Parciales
+
+¿Cómo se distribuye la carrera de un nadador a través de sus parciales?
+
+A continuación, vamos a seleccionar un 400m FREE de la nadadora Katie Ledecky, y vamos a graficar sus parciales a lo largo de la prueba. 
+
+```{python}
+import numpy as np
+
+# 1. Configuración de la búsqueda
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_disciplina = "400m FREE"
+
+# 2. Filtrado del DataFrame
+df_swimmer = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains("400m FREE")) # Flexible por si es FREESTYLE o FREE
+]
+
+# Verificamos que existan datos
+if df_swimmer.empty:
+    print(f"No se encontraron datos para {target_nombre} {target_apellido} en {target_disciplina}.")
+else:
+    # 3. Selección Aleatoria de Competición
+    ids_competiciones = df_swimmer['id_competicion'].unique()
+    
+    # Seleccionamos uno aleatoriamente
+    id_random = np.random.choice(ids_competiciones)
+
+    df_carrera = df_swimmer[df_swimmer['id_competicion'] == id_random].copy()
+    
+    if 'FHT' in df_carrera['ronda'].values:
+        df_carrera = df_carrera[df_carrera['ronda'] == 'FHT']
+    else:
+        # Si no hay final, cogemos la primera ronda disponible (ej. PRE)
+        ronda_disp = df_carrera['ronda'].iloc[0]
+        df_carrera = df_carrera[df_carrera['ronda'] == ronda_disp]
+    
+    df_carrera = df_carrera.sort_values('distancia_parcial')
+
+    # 4. Cálculo del Tiempo del Parcial (Split)
+    df_carrera['tiempo_parcial_calculado'] = df_carrera['tiempo_acumulado_seg'].diff().fillna(df_carrera['tiempo_acumulado_seg'])
+
+    # Datos para el título
+    
+
+    print(f"Graficando: {target_nombre} {target_apellido} | {target_disciplina}")
+    print(f"Competición ID: {id_random}")
+
+    # 5. Graficar
+    fig_parciales = px.line(
+        df_carrera, 
+        x='distancia_parcial', 
+        y='tiempo_parcial_calculado', 
+        markers=True,
+        text=df_carrera['tiempo_parcial_calculado'].round(2), # Mostrar valor en el punto
+        title=f"Ritmo de Carrera (Splits): {target_nombre} {target_apellido}<br><sup>{target_disciplina}</sup>",
+        labels={
+            'distancia_parcial': 'Distancia (m)', 
+            'tiempo_parcial_calculado': 'Tiempo de Vuelta (s)'
+        },
+        template="plotly_white"
+    )
+    
+    # Ajuste para que las etiquetas se lean bien
+    fig_parciales.update_traces(textposition="top center")
+    # Ajustar eje Y para que no empiece necesariamente en 0 y se vea mejor la variación del ritmo
+    fig_parciales.update_yaxes(rangemode="tozero") 
+    
+    fig_parciales.show()
+```
+
+Observamos que gracias a la propulsión del trampolín, es capaz de nadar el primer 50 muy rápido y luego se estabiliza en parciales cercanos a 30. 
+
+## Evolución temporal de rendimiento
+
+Vamos a analizar cómo ha evolucionado el rendimiento de Katie Ledecky a lo largo del tiempo para la prueba de 800m FREE. 
+
+```{python}
+import plotly.express as px
+import pandas as pd
+
+
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_prueba = "800m FREE" 
+
+
+df_evolucion = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains(target_prueba, case=False))
+].copy()
+
+
+df_evolucion = df_evolucion.drop_duplicates(subset=['id_competicion', 'ronda'])
+
+
+if 'nombre' not in df_evolucion.columns:
+    df_evolucion = pd.merge(df_evolucion, df_competiciones[['ID', 'nombre', 'ciudad']], 
+                            left_on='id_competicion', right_on='ID', how='left')
+
+
+df_evolucion = df_evolucion.sort_values('fecha_hora')
+
+print(f"Registros para graficar: {len(df_evolucion)}")
+
+
+fig_evol = px.line(
+    df_evolucion,
+    x='fecha_hora',       
+    y='tiempo_final_seg', 
+    markers=True,         
+    text=df_evolucion['ronda'].str[0], 
+    hover_name='nombre',  
+    hover_data={
+        'fecha_hora': '|%Y-%m-%d', 
+        'tiempo_final_seg': False, 
+        'tiempo_final': True,      
+        'ronda': True,             
+        'ciudad': True
+    },
+    title=f"Evolución de Rendimiento: {target_nombre} {target_apellido} - {target_prueba}",
+    template="plotly_white"
+)
+
+fig_evol.update_traces(
+    line=dict(color='#1f77b4', width=3), 
+    marker=dict(size=8, symbol='circle'), 
+    textposition="top center" 
+)
+
+fig_evol.update_layout(
+    xaxis_title="Fecha",
+    yaxis_title="Tiempo (segundos)",
+    yaxis=dict(autorange="reversed") 
+)
+
+fig_evol.show()
+```
+
+## Participación por Clubes en Competiciones Clave. 
+
+Visualizamos la representación de los clubes o países en una competición específica para entender el evento: 
+
+```{python}
+target_comp_id = 1  
+df_participacion = representacion_clubes_competicion[
+    representacion_clubes_competicion['id_competicion'] == target_comp_id
+].copy()
+
+df_top10 = df_participacion.sort_values('atletas_distintos', ascending=False).head(10)
+
+nombre_competicion = df_top10['nombre'].iloc[0]
+anio_competicion = df_top10['anio'].iloc[0]
+
+print(f"Graficando Top 10 para: {nombre_competicion} ({anio_competicion})")
+
+# 4. Graficar
+fig_part = px.bar(
+    df_top10,
+    x='club_name',       # Eje X: Nombre del Club/País
+    y='atletas_distintos', # Eje Y: Cantidad de nadadores
+    text_auto=True,      # Muestra el número encima de la barra automáticamente
+    color='atletas_distintos', # Colorea según la cantidad (opcional, queda bonito)
+    title=f"Top 10 Participación: {nombre_competicion}",
+    labels={
+        'club_name': 'Club / País',
+        'atletas_distintos': 'Nº Atletas'
+    },
+    template="plotly_white"
+)
+
+# Ajustes de diseño
+fig_part.update_layout(
+    xaxis_tickangle=-45, # Inclina los nombres si son muy largos
+    showlegend=False      # Ocultamos la leyenda porque el color ya da la info
+)
+
+fig_part.show()
+```
+
+## Preguntas directas sobre los datos
+
+### ¿Qué nadador ha tenido la mayor mejora porcentual promedio?
+
+```{python}
+print(f"\nTop 1 nadador con mayor % de mejora promedio:")
+display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(1))
+```
+
+### ¿Cuáles son la prueba más rápida del ciclo (menor tiempo registrado)?
+
+```{python}
+idx_min = resultados_atletas['tiempo_final_seg'].idxmin()
+registro_record = resultados_atletas.loc[idx_min]
+tiempo_str = registro_record['tiempo_final'] # Para mostrarlo bonito (texto)
+
+# 4. Imprimir resultado
+print(f"El tiempo final más bajo ({tiempo_str}) se realizó en la prueba {registro_record['disciplina']}")
+```
+
+### ¿Qué nadador ha competido más veces durante el ciclo? ¿Y menos?
+
+```{python}
+
+participacion_atletas = resultados_atletas.groupby(['id_atleta', 'NOMBRE', 'APELLIDOS'])['id_competicion'].nunique().reset_index()
+participacion_atletas.rename(columns={'id_competicion': 'num_competiciones'}, inplace=True)
+
+max_comps = participacion_atletas['num_competiciones'].max()
+min_comps = participacion_atletas['num_competiciones'].min()
+
+nadadores_max = participacion_atletas[participacion_atletas['num_competiciones'] == max_comps]
+nadadores_min_count = len(participacion_atletas[participacion_atletas['num_competiciones'] == min_comps])
+
+print(f"--- Análisis de Asistencia ---")
+
+print(f"El récord de asistencia es de {max_comps} competiciones.")
+print("Nadador(es) con más participaciones:")
+for index, row in nadadores_max.iterrows():
+    print(f"- {row['NOMBRE']} {row['APELLIDOS']}")
+
+print("-" * 30)
+print(f"El mínimo de asistencia es de {min_comps} competición.")
+print(f"Hay {nadadores_min_count} nadadores que solo han acudido a una única competición registrada en el ciclo.")
+```
+
+# Carga de Datos
+
+En la última fase del proceso ETL, se almacenan los DataFrames procesados en archivos CSV para su uso futuro.
+
+```{python}
+
+output_dir = "data/final_data/"
+os.makedirs(output_dir, exist_ok=True)
+
+# 1. DataFrames Base Procesados
+df_atletas.to_csv(f"{output_dir}atletas_procesado.csv", index=False)
+df_clubes.to_csv(f"{output_dir}clubes_procesado.csv", index=False)
+df_competiciones.to_csv(f"{output_dir}competiciones_procesado.csv", index=False)
+df_resultados.to_csv(f"{output_dir}resultados_procesado.csv", index=False)
+
+# 2. DataFrames de Análisis
+resultados_atletas.to_csv(f"{output_dir}resultados_atletas.csv", index=False)
+clubes_competicion_ampliado.to_csv(f"{output_dir}clubes_competicion_ampliado.csv", index=False)
+representacion_clubes_competicion.to_csv(f"{output_dir}representacion_clubes_competicion.csv", index=False)
+estadisticas_atleta_competicion.to_csv(f"{output_dir}estadisticas_atleta_competicion.csv", index=False)
+estadisticas_atleta_temporada.to_csv(f"{output_dir}estadisticas_atleta_temporada.csv", index=False)
+estadisticas_rendimiento.to_csv(f"{output_dir}estadisticas_rendimiento.csv", index=False)
+
+print("=" * 50)
+print("CARGA COMPLETADA")
+print("=" * 50)
+print(f"\nSe han guardado {10} archivos CSV en: {output_dir}")
+print("\nDataFrames Base con transformaciones:")
+print("  - atletas_procesado.csv")
+print("  - clubes_procesado.csv")
+print("  - competiciones_procesado.csv")
+print("  - resultados_procesado.csv")
+print("\nDataFrames de Análisis:")
+print("  - resultados_atletas.csv")
+print("  - clubes_competicion_ampliado.csv")
+print("  - representacion_clubes_competicion.csv")
+print("  - estadisticas_atleta_competicion.csv")
+print("  - estadisticas_atleta_temporada.csv")
+print("  - estadisticas_rendimiento.csv")
+
+```
+
+# Conclusiones
+
+Tras la ejecución del flujo ETL y el análisis exploratorio, exraemos las siguientes conclusiones: 
+
+1. **Calidad de los datos**: Se ha logrado homogeneizar distintas competiciones. La conversión de tiempos a segundos y el procesamiento de tipos para fechas permiten ahora operaciones precisas sobre el rendimiento de los nadadores. 
+2. **Métricas de valor**: La métrica de "Porcentaje de Mejora Global" revela cómo ha influido el ciclo olímpico en todos y cada uno de los nadadores. 
+3. **Estrategias de la prueba**: A través de las visualizaciones de parciales, se puede observar cómo desarrolla un nadador una determinada prueba, logrando así que se puedan observar posibles planteamientos de la prueba nadada. 
+
+La limpieza de datos ha expuesto inconsistencias que inicialmente no se conocían, como la nomenclatura de clubes, lo que justica la necesidad de la tabla df_clubes normalizada. 
+El análisis de asistencia muestra cómo la mayor parte de los nadadores sólo compiten en una sóla prueba, debido a que estamos unificando pruebas como mundiales, junto con nacionales o tomas de tiempo que tienen un nivel de entrada más flexible. 
+
+Algunas **extensiones a futuro** de este trabajo pueden ser: 
+
+1. **Machine Learning**: Para predecir tiempos finales de un nadador o carreras enteras. También usable para clasificar a través de herramientas de aprendizaje no supervisado a tipos de nadadores en función de las pruebas que nadan, los tiempos que realizan o la forma de plantear sus pruebas. 
+
+2. **Dashboarding**: Conectar todos los dataframes creados para hacer una página web en la que cualquier nadador/club pueda consultar sus tiempos en cuestión de segundos gracias a la eficiencia de hacer joins entre las distintas tablas maestras. 
+
