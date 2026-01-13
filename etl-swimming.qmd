@@ -18,16 +18,11 @@ lang: es
 ---
 
 # Introducción {#introduccion}
-- Descripción del tema elegido
-- Fuentes de datos
-- Objetivos del análisis
 
 Este proyecto presenta un flujo de trabajo ETL (Extract, Transform, Load) aplicado a datos oficiales de competiciones internacionales de natación entre 2021 y 2024. La **fuente de datos** proviene de los registros oficiales de [Omega Timing](https://www.omegatiming.com/), que proporciona a través de archivos XML información referente a múltiples competiciones de nivel internacional (Europeos, Mundiales, Trials Americanos, TYR Pro Swim Series, entre otros).
 
-El **objetivo principal** del análisis es transformar los datos crudos en información procesable que permita responder preguntas clave sobre el rendimiento de los nadadores, tendencias temporales y comparativas entre diferentes competiciones y categorías.
+El **objetivo principal** del análisis es transformar los datos crudos en información procesable que permita responder preguntas clave sobre el rendimiento de los nadadores, tendencias temporales y comparativas entre diferentes competiciones.
 
-
-*sección modificable acorde al desarrollo mismo del proyecto*
 
 # Organización y Gestión del Proyecto
 
@@ -128,35 +123,55 @@ def explorar_estructura(df, nombre_df, filas=3):
     display(df.head(filas))
     print("\n" + "="*50 + "\n")
 
-def verificar_unicidad(df, col_id):
+
+def verificar_unicidad(df, col_id, cols_entidad=None):
     """
     Datos de entrada:
     - df: DataFrame a explorar.
     - col_id: Nombre de la columna a verificar como identificador único. (String)
-
+    - cols_entidad (Opcional): Lista de columnas que definen a la entidad real 
+      (ej: ['nombre', 'apellidos', 'fecha_nacimiento']).
+    
     Funcionalidad:
-    Verifica si una columna específica actúa como identificador único para esa tabla.
+    1. Verifica si col_id es único.
+    2. Si se provee cols_entidad, verifica si una misma entidad tiene múltiples IDs diferentes.
     """
     print(f"Verificando identificador '{col_id}':")
     
     try:
+        # 1. Verificación básica de ID (Tu código original)
         serie = df[col_id]
         if serie.is_unique:
-            print(f"La columna '{col_id}' es un identificador único en el DataFrame.")
+            print(f"La columna '{col_id}' es un identificador único (técnicamente).")
         else:
             total = len(df)
             unicos = serie.nunique()
-            print(f"La columna '{col_id}' NO es un identificador único. Tiene {unicos} valores únicos de {total} registros.")
+            print(f"La columna '{col_id}' NO es única. Tiene {unicos} valores únicos de {total} registros.")
 
-    except KeyError:
-        print(f"ERROR DE ACCESO: La columna '{col_id}' no existe en el DataFrame.")
+        # 2. Verificación de Integridad de Entidad (Nueva funcionalidad)
+        if cols_entidad:
+            print(f"   ↳ Analizando duplicidad lógica en: {cols_entidad}...")
+            
+            # Agrupamos por los datos de la persona y contamos cuántos IDs únicos tiene cada una
+            duplicidad = df.groupby(cols_entidad)[col_id].nunique()
+            
+            # Filtramos aquellos que tengan más de 1 ID asociado
+            casos_problematicos = duplicidad[duplicidad > 1]
+            
+            if len(casos_problematicos) > 0:
+                print(f"¡ALERTA! Se encontraron {len(casos_problematicos)} personas/entidades con MÚLTIPLES IDs distintos.")
+                print(f"      Ejemplo: {casos_problematicos.index[0]} tiene {casos_problematicos.iloc[0]} IDs diferentes.")
+            else:
+                print(f"Integridad correcta: Cada persona (combinación de campos) tiene un solo ID asignado.")
+
+    except KeyError as e:
+        # Detecta si falla el ID o las columnas de entidad
+        print(f"ERROR DE ACCESO: Alguna columna no existe en el DataFrame. Detalle: {e}")
         
     except Exception as e:
-        # Captura cualquier otro error inesperado (por ejemplo, dataframe corrupto)
         print(f"ERROR INESPERADO: {e}")
 
     finally:
-        # El bloque finally se ejecuta SIEMPRE, haya error o no. Ideal para formato.
         print("-" * 30)
 
 ```
@@ -169,16 +184,16 @@ Comenzamos con el DataFrame `df_atletas`, que contiene información sobre los na
 explorar_estructura(df_atletas, 'ID', filas=5)
 ```
 
-Se puede observar que el DataFrame `df_atletas` tiene 4,700 filas y 5 columnas. Para cada nadador, se registra su identificador (`ID`), su nombre (`NOMBRE`), sus apellidos (`APELLIDOS`), su fecha de nacimiento (`birthday`) y su género (`género`).
+Se puede observar que el DataFrame `df_atletas` tiene 4,710 filas y 5 columnas. Para cada nadador, se registra su identificador (`ID`), su nombre (`NOMBRE`), sus apellidos (`APELLIDOS`), su fecha de nacimiento (`birthday`) y su género (`género`).
 
 Verificamos si la columna `ID` es un identificador único para este DataFrame:
 
 ```{python}
-verificar_unicidad(df_atletas, 'ID')
+verificar_unicidad(df_atletas, 'ID', ['NOMBRE', 'APELLIDOS', 'birthday', 'género'])
 ```
 
 
-Por lo tanto, podemos concluir que en el DataFrame `df_atletas`, la columna `ID` actúa como clave primaria y no hay errores en la carga. 
+Por lo tanto, podemos concluir que en el DataFrame `df_atletas`, la columna `ID` actúa como clave primaria pero hay atletas que tienen asignado el mismo ID. 
 
 ### Clubes
 
@@ -231,6 +246,7 @@ Se observa que el DataFrame `df_resultados` tiene 179696 filas y 13 columnas. Ca
 
 Tras la exploración inicial de los datos, procedemos a la fase de pre-procesamiento, donde vamos a realizar las siguientes tareas: 
 
+- Correción de errores de consistencia en los ID's de atletas
 - Tratamiento de tipos de datos en las columnas
 - Manejo de valores nulos
 - Transformación de fechas
@@ -241,6 +257,7 @@ Tras la exploración inicial de los datos, procedemos a la fase de pre-procesami
 
 Para llevar a cabo el pre-procesamiento de manera sistemática y reutilizable, hemos desarrollado las siguientes funciones:
 
+- `consolidar_ids_nadadores(df_atletas, df_resultados, col_id, col_id_2, cols_entidad)`: Unifica nadadores que tienen múltiples IDs basándose en sus datos de nombre, apellido etc...
 - `verificar_nulos(df, nombre_df)`: Detecta y cuantifica valores faltantes en cada columna.
 - `cambiar_tipos_datos(df, mapeo_tipos)`: Convierte tipos de datos según un diccionario especificado.
 - `limpiar_espacios_blancos(df)`: Elimina espacios en blanco al inicio y final de valores texto.
@@ -248,6 +265,54 @@ Para llevar a cabo el pre-procesamiento de manera sistemática y reutilizable, h
 - `mostrar_resumen_preprocesamiento(df, nombre_df)`: Muestra un resumen del estado del DataFrame tras el pre-procesamiento.
 
 ```{python}
+def consolidar_ids_nadadores(df_atletas, df_resultados, col_id, col_id_2, cols_entidad):
+    """
+    Unifica nadadores que tienen múltiples IDs basándose en sus datos personales.
+    
+    Retorna:
+    - df_atletas_limpio: DataFrame sin los IDs duplicados (filas eliminadas).
+    - df_resultados_corregido: DataFrame con los IDs antiguos reemplazados por el unificado.
+    """
+    df_a_new = df_atletas.copy()
+    df_r_new = df_resultados.copy()
+    
+    print("--- Iniciando consolidación de IDs ---")
+
+
+    grupos = df_a_new.groupby(cols_entidad)[col_id].unique()
+    duplicados = grupos[grupos.apply(lambda x: len(x) > 1)]
+    
+    mapa_cambios = {}
+    ids_a_eliminar = []
+    
+    if len(duplicados) == 0:
+        print("No se encontraron duplicados. No hay cambios que hacer.")
+        return df_a_new, df_r_new
+
+    print(f"Se encontraron {len(duplicados)} nadadores con múltiples IDs. Unificando...")
+
+    for ids in duplicados:
+        ids_ordenados = sorted(ids)
+        id_superviviente = ids_ordenados[0]
+        ids_sacrificables = ids_ordenados[1:]
+        
+        for id_malo in ids_sacrificables:
+            mapa_cambios[id_malo] = id_superviviente
+            ids_a_eliminar.append(id_malo)
+
+    n_cambios = df_r_new[col_id_2].isin(mapa_cambios.keys()).sum()
+    df_r_new[col_id_2] = df_r_new[col_id_2].replace(mapa_cambios)
+    
+    print(f"Se han actualizado {n_cambios} registros en la tabla de resultados.")
+
+    total_antes = len(df_a_new)
+    df_a_new = df_a_new[~df_a_new[col_id].isin(ids_a_eliminar)]
+    total_despues = len(df_a_new)
+    
+    print(f"Se han eliminado {total_antes - total_despues} perfiles duplicados en la tabla de atletas.")
+    print("-" * 30)
+    return df_a_new, df_r_new
+
 def verificar_nulos(df, nombre_df):
     """
     Datos de entrada:
@@ -375,6 +440,23 @@ def mostrar_resumen_preprocesamiento(df, nombre_df):
     print("\n" + "="*50 + "\n")
 ```
 
+## Consolidación de IDs de atletas
+
+```{python}
+# Definimos qué columnas hacen única a una persona
+cols_persona = ['NOMBRE', 'APELLIDOS', 'birthday', 'género']
+
+# Ejecutamos la función y SOBRESCRIBIMOS las variables antiguas con las nuevas versiones
+df_atletas, df_resultados = consolidar_ids_nadadores(
+    df_atletas, 
+    df_resultados, 
+    'ID',
+    'id_atleta', 
+    cols_persona
+)
+
+```
+
 ## Tratamiento de Tipos de Datos
 
 Comenzamos transformando los tipos de datos de las columnas para asegurar que cada variable tiene el formato adecuado para análisis posterior.
@@ -449,6 +531,7 @@ tipos_resultados = {
 df_resultados = cambiar_tipos_datos(df_resultados, tipos_resultados)
 ```
 
+
 ## Manejo de Valores Nulos
 
 Realizamos un análisis exhaustivo de valores faltantes en cada DataFrame y decidimos cómo tratarlos.
@@ -477,6 +560,11 @@ verificar_nulos(df_competiciones, 'Competiciones')
 verificar_nulos(df_resultados, 'Resultados')
 ```
 
+Analizando los datos faltantes, se identifican 2 variables con valores de este tipo: 
+
+- Puntos: Hace referencia a los puntos FINA conseguidos y asignados a su tiempo final. La ausencia de este dato tiene naturaleza mixta, por un lado, aquellos nadadores descalificados, no obtienen puntos, asignándose el valor faltante a esa variable. Por otro lado, una gran parte de los nulos restantes se deben a que ciertas competiciones registradas simplemente no calcularon este dato y no lo registraron. 
+
+- distancia_parcial: Valores nulos en la distancia parcial para aquellos nadadores que no tienen valores de parcial. Son nadadores descalificados que no llegaron a completar una parte de la prueba, es por ello que dicha variable tiene datos faltantes.
 
 ## Limpieza de Espacios en Blanco
 
