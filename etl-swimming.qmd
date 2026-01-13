@@ -1124,9 +1124,20 @@ print(f"Hay {nadadores_min_count} nadadores que solo han acudido a una única co
 
 
 # Conclusiones
-- Hallazgos principales
-- Insights relevates
-- Posibles extensiones del estudio
+
+Tras la ejecución del flujo ETL y el análisis exploratorio, exraemos las siguientes conclusiones: 
+
+1. **Calidad de los datos**: Se ha logrado homogeneizar distintas competiciones. La conversión de tiempos a segundos y el procesamiento de tipos para fechas permiten ahora operaciones precisas sobre el rendimiento de los nadadores. 
+2. **Métricas de valor**: La métrica de "Porcentaje de Mejora Global" revela cómo ha influido el ciclo olímpico en todos y cada uno de los nadadores. 
+3. **Estrategias de la prueba**: A través de las visualizaciones de parciales, se puede observar cómo desarrolla un nadador una determinada prueba, logrando así que se puedan observar posibles planteamientos de la prueba nadada. 
+
+La limpieza de datos ha expuesto inconsistencias que inicialmente no se conocían, como la nomenclatura de clubes, lo que justica la necesidad de la tabla df_clubes normalizada. 
+El análisis de asistencia muestra cómo la mayor parte de los nadadores sólo compiten en una sóla prueba, debido a que estamos unificando pruebas como mundiales, junto con nacionales o tomas de tiempo que tienen un nivel de entrada más flexible. 
+
+Algunas **extensiones a futuro** de este trabajo pueden ser: 
+
+1. **Machine Learning**: Para predecir tiempos finales de un nadador o carreras enteras. También usable para clasificar a través de herramientas de aprendizaje no supervisado a tipos de nadadores en función de las pruebas que nadan, los tiempos que realizan o la forma de plantear sus pruebas. 
+
+2. **Dashboarding**: Conectar todos los dataframes creados para hacer una página web en la que cualquier nadador/club pueda consultar sus tiempos en cuestión de segundos gracias a la eficiencia de hacer joins entre las distintas tablas maestras. 
 
 # Carga de Datos
-- Exportación y guardado de resultados 
