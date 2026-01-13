@@ -886,10 +886,119 @@ display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(5
 
 
 # Análisis y Visualizaciones
-- Preguntas con visualizaciones (+3)
-- Preguntas directas (+3)
 
-coger un club y ver su máxima participacion. 
+En esta etapa, utilizaremos la librería plotly para generar gráficos interactivos que nos permitan inspeccionar a través de los datos. 
+
+```{python}
+import plotly.express as px
+import plotly.graph_objects as go
+
+template_design = "plotly_white"
+```
+
+## Análisis de Parciales
+
+¿Cómo se distribuye la carrera de un nadador a través de sus parciales?
+
+A continuación, vamos a seleccionar un 400m FREE de la nadadora Katie Ledecky, y vamos a graficar sus parciales a lo largo de la prueba. 
+
+```{python}
+import numpy as np
+
+# 1. Configuración de la búsqueda
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_disciplina = "400m FREE"
+
+# 2. Filtrado del DataFrame
+df_swimmer = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains("400m FREE")) # Flexible por si es FREESTYLE o FREE
+]
+
+# Verificamos que existan datos
+if df_swimmer.empty:
+    print(f"No se encontraron datos para {target_nombre} {target_apellido} en {target_disciplina}.")
+else:
+    # 3. Selección Aleatoria de Competición
+    ids_competiciones = df_swimmer['id_competicion'].unique()
+    
+    # Seleccionamos uno aleatoriamente
+    id_random = np.random.choice(ids_competiciones)
+
+    df_carrera = df_swimmer[df_swimmer['id_competicion'] == id_random].copy()
+    
+    if 'FHT' in df_carrera['ronda'].values:
+        df_carrera = df_carrera[df_carrera['ronda'] == 'FHT']
+    else:
+        # Si no hay final, cogemos la primera ronda disponible (ej. PRE)
+        ronda_disp = df_carrera['ronda'].iloc[0]
+        df_carrera = df_carrera[df_carrera['ronda'] == ronda_disp]
+    
+    df_carrera = df_carrera.sort_values('distancia_parcial')
+
+    # 4. Cálculo del Tiempo del Parcial (Split)
+    df_carrera['tiempo_parcial_calculado'] = df_carrera['tiempo_acumulado_seg'].diff().fillna(df_carrera['tiempo_acumulado_seg'])
+
+    # Datos para el título
+    
+
+    print(f"Graficando: {target_nombre} {target_apellido} | {target_disciplina}")
+    print(f"Competición ID: {id_random}")
+
+    # 5. Graficar
+    fig_parciales = px.line(
+        df_carrera, 
+        x='distancia_parcial', 
+        y='tiempo_parcial_calculado', 
+        markers=True,
+        text=df_carrera['tiempo_parcial_calculado'].round(2), # Mostrar valor en el punto
+        title=f"Ritmo de Carrera (Splits): {target_nombre} {target_apellido}<br><sup>{target_disciplina}</sup>",
+        labels={
+            'distancia_parcial': 'Distancia (m)', 
+            'tiempo_parcial_calculado': 'Tiempo de Vuelta (s)'
+        },
+        template="plotly_white"
+    )
+    
+    # Ajuste para que las etiquetas se lean bien
+    fig_parciales.update_traces(textposition="top center")
+    # Ajustar eje Y para que no empiece necesariamente en 0 y se vea mejor la variación del ritmo
+    fig_parciales.update_yaxes(rangemode="tozero") 
+    
+    fig_parciales.show()
+```
+
+Observamos que gracias a la propulsión del trampolín, es capaz de nadar el primer 50 muy rápido y luego se estabiliza en parciales cercanos a 30. 
+
+## Evolución temporal de rendimiento
+
+Vamos a analizar cómo ha evolucionado el rendimiento de Katie Ledecky a lo largo del tiempo para la prueba de 800m FREE. 
+
+```{python}
+
+```
+
+## Participación por Clubes en Competiciones Clave. 
+
+Visualizamos la representación de los clubes o países en una competición específica para entender el evento: 
+
+```{python}
+
+```
+
+## Preguntas directas sobre los datos
+
+### ¿Qué nadador ha tenido la mayor mejora porcentual promedio?
+
+```{python}
+
+```
+
+### ¿Cuáles son la prueba más rápida del ciclo (menor tiempo registrado)?
+
+### ¿Qué nadador ha competido más veces durante el ciclo? ¿Y menos?
 
 # Conclusiones
 - Hallazgos principales
