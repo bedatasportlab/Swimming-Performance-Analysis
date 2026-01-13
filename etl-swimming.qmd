@@ -865,8 +865,8 @@ print(maxima_participacion.head(10))
 En esta segunda operación de groupby se calculan las estadísticas de competición para cada atleta:
 
 - El número de competiciones distintas en las que han participado. 
-- El número de veces que han competido en cada año.
-- El número de competiciones por año.
+- El número de veces que han competido en cada año (contado con todas las rondas de cada competición).
+- El número de temporadas que han completado.
 
 ```{python}
 estadisticas_atleta_competicion = (resultados_atletas
