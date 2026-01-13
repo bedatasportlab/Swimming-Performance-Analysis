@@ -671,7 +671,13 @@ El *df_atletas* se junta con *df_resultados* para obtener una fila por cada resu
 Todos los resultados tienen algún atleta asociado. Sin embargo, puede haber algún atleta que no tenga todos los resultados registrados. Para no perder la información de ningún atleta se utiliza el *left join*.
 
 ```{python}
-resultados_atletas = pd.merge(df_atletas, df_resultados, left_on='ID', right_on='id_atleta', how='left')
+resultados_atletas = pd.merge(
+    df_resultados,     
+    df_atletas,        
+    left_on='id_atleta', 
+    right_on='ID', 
+    how='left'         
+)
 
 #Comprobar resultados
 print("Resultados de los atletas por prueba y competición:")
@@ -841,11 +847,49 @@ estadisticas_rendimiento = estadisticas_rendimiento.merge(disciplina_top, on="ID
 
 ## Cálculo de métricas
 
-- Idea: Obtener la mejor marca de un atleta en cada prueba
+En esta sección se realiza el cálculo de 2 nuevas métricas: 
+
+1. Cálculo de la posición de cada atleta en la prueba nadada. 
+2. Porcentaje de Mejora: Calcularemos cuánto ha mejorado en % un nadador su tiempo desde su primera vez que nadó hasta su mejor marca personal en el ciclo. 
+
+Para la primera métrica, vamos a realizar el cálculo en el dataframe creado anteriormente, `resultados_atletas`. Para ello, vamos a agrupar por competición, estilo, distancia, ronda y género. Además, asignaremos la misma posición a empates, por lo que usamos el método 'min' al rankear.
+
+Para la segunda métrica, vamos a recoger primero por atleta y disciplina, sus tiempos máximo y mínimo del ciclo olímpico. Tras ello, calculamos el porcentaje de mejora y luego realizamos un merge con el dataframe con el objetivo de tener dicho porcentaje de mejora. 
+
+
+```{python}
+# 1. Cálculo de la posición (Ranking)
+resultados_atletas['posicion'] = (
+    resultados_atletas.groupby(['id_competicion', 'distancia', 'estilo', 'ronda', 'género'])['tiempo_final_seg']
+    .rank(method='min', ascending=True)
+)
+print("Ejemplo de posiciones calculadas:")
+display(resultados_atletas[['id_competicion', 'disciplina', 'ronda', 'tiempo_final', 'posicion']].head())
+
+
+# 2. Porcentaje de Mejora
+mejora_df = resultados_atletas.groupby(['ID', 'disciplina'])['tiempo_final_seg'].agg(['max', 'min']).reset_index()
+mejora_df['porcentaje_mejora'] = ((mejora_df['max'] - mejora_df['min']) / mejora_df['max']) * 100
+
+# Unimos esta métrica al df de rendimiento anterior
+df_atletas = df_atletas.merge(
+    mejora_df.groupby('ID')['porcentaje_mejora'].mean().reset_index(), # Promedio de mejora en todas sus disciplinas
+    on='ID', 
+    how='left'
+)
+df_atletas.rename(columns={'porcentaje_mejora': 'promedio_mejora_global'}, inplace=True)
+
+print(f"\nTop 5 nadadores con mayor % de mejora promedio:")
+display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(5))
+```
+
+
 
 # Análisis y Visualizaciones
 - Preguntas con visualizaciones (+3)
 - Preguntas directas (+3)
+
+coger un club y ver su máxima participacion. 
 
 # Conclusiones
 - Hallazgos principales
