@@ -1145,6 +1145,47 @@ print(f"El mínimo de asistencia es de {min_comps} competición.")
 print(f"Hay {nadadores_min_count} nadadores que solo han acudido a una única competición registrada en el ciclo.")
 ```
 
+# Carga de Datos
+
+En la última fase del proceso ETL, se almacenan los DataFrames procesados en archivos CSV para su uso futuro.
+
+```{python}
+
+output_dir = "data/final_data/"
+os.makedirs(output_dir, exist_ok=True)
+
+# 1. DataFrames Base Procesados
+df_atletas.to_csv(f"{output_dir}atletas_procesado.csv", index=False)
+df_clubes.to_csv(f"{output_dir}clubes_procesado.csv", index=False)
+df_competiciones.to_csv(f"{output_dir}competiciones_procesado.csv", index=False)
+df_resultados.to_csv(f"{output_dir}resultados_procesado.csv", index=False)
+
+# 2. DataFrames de Análisis
+resultados_atletas.to_csv(f"{output_dir}resultados_atletas.csv", index=False)
+clubes_competicion_ampliado.to_csv(f"{output_dir}clubes_competicion_ampliado.csv", index=False)
+representacion_clubes_competicion.to_csv(f"{output_dir}representacion_clubes_competicion.csv", index=False)
+estadisticas_atleta_competicion.to_csv(f"{output_dir}estadisticas_atleta_competicion.csv", index=False)
+estadisticas_atleta_temporada.to_csv(f"{output_dir}estadisticas_atleta_temporada.csv", index=False)
+estadisticas_rendimiento.to_csv(f"{output_dir}estadisticas_rendimiento.csv", index=False)
+
+print("=" * 50)
+print("CARGA COMPLETADA")
+print("=" * 50)
+print(f"\nSe han guardado {10} archivos CSV en: {output_dir}")
+print("\nDataFrames Base con transformaciones:")
+print("  - atletas_procesado.csv")
+print("  - clubes_procesado.csv")
+print("  - competiciones_procesado.csv")
+print("  - resultados_procesado.csv")
+print("\nDataFrames de Análisis:")
+print("  - resultados_atletas.csv")
+print("  - clubes_competicion_ampliado.csv")
+print("  - representacion_clubes_competicion.csv")
+print("  - estadisticas_atleta_competicion.csv")
+print("  - estadisticas_atleta_temporada.csv")
+print("  - estadisticas_rendimiento.csv")
+
+```
 
 # Conclusiones
 
@@ -1163,4 +1204,3 @@ Algunas **extensiones a futuro** de este trabajo pueden ser:
 
 2. **Dashboarding**: Conectar todos los dataframes creados para hacer una página web en la que cualquier nadador/club pueda consultar sus tiempos en cuestión de segundos gracias a la eficiencia de hacer joins entre las distintas tablas maestras. 
 
-# Carga de Datos
