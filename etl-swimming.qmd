@@ -671,7 +671,13 @@ El *df_atletas* se junta con *df_resultados* para obtener una fila por cada resu
 Todos los resultados tienen algún atleta asociado. Sin embargo, puede haber algún atleta que no tenga todos los resultados registrados. Para no perder la información de ningún atleta se utiliza el *left join*.
 
 ```{python}
-resultados_atletas = pd.merge(df_atletas, df_resultados, left_on='ID', right_on='id_atleta', how='left')
+resultados_atletas = pd.merge(
+    df_resultados,     
+    df_atletas,        
+    left_on='id_atleta', 
+    right_on='ID', 
+    how='left'         
+)
 
 #Comprobar resultados
 print("Resultados de los atletas por prueba y competición:")
@@ -841,16 +847,297 @@ estadisticas_rendimiento = estadisticas_rendimiento.merge(disciplina_top, on="ID
 
 ## Cálculo de métricas
 
-- Idea: Obtener la mejor marca de un atleta en cada prueba
+En esta sección se realiza el cálculo de 2 nuevas métricas: 
+
+1. Cálculo de la posición de cada atleta en la prueba nadada. 
+2. Porcentaje de Mejora: Calcularemos cuánto ha mejorado en % un nadador su tiempo desde su primera vez que nadó hasta su mejor marca personal en el ciclo. 
+
+Para la primera métrica, vamos a realizar el cálculo en el dataframe creado anteriormente, `resultados_atletas`. Para ello, vamos a agrupar por competición, estilo, distancia, ronda y género. Además, asignaremos la misma posición a empates, por lo que usamos el método 'min' al rankear.
+
+Para la segunda métrica, vamos a recoger primero por atleta y disciplina, sus tiempos máximo y mínimo del ciclo olímpico. Tras ello, calculamos el porcentaje de mejora y luego realizamos un merge con el dataframe con el objetivo de tener dicho porcentaje de mejora. 
+
+
+```{python}
+# 1. Cálculo de la posición (Ranking)
+resultados_atletas['posicion'] = (
+    resultados_atletas.groupby(['id_competicion', 'distancia', 'estilo', 'ronda', 'género'])['tiempo_final_seg']
+    .rank(method='min', ascending=True)
+)
+print("Ejemplo de posiciones calculadas:")
+display(resultados_atletas[['id_competicion', 'disciplina', 'ronda', 'tiempo_final', 'posicion']].head())
+
+
+# 2. Porcentaje de Mejora
+mejora_df = resultados_atletas.groupby(['ID', 'disciplina'])['tiempo_final_seg'].agg(['max', 'min']).reset_index()
+mejora_df['porcentaje_mejora'] = ((mejora_df['max'] - mejora_df['min']) / mejora_df['max']) * 100
+
+# Unimos esta métrica al df de rendimiento anterior
+df_atletas = df_atletas.merge(
+    mejora_df.groupby('ID')['porcentaje_mejora'].mean().reset_index(), # Promedio de mejora en todas sus disciplinas
+    on='ID', 
+    how='left'
+)
+df_atletas.rename(columns={'porcentaje_mejora': 'promedio_mejora_global'}, inplace=True)
+```
+
+
 
 # Análisis y Visualizaciones
-- Preguntas con visualizaciones (+3)
-- Preguntas directas (+3)
+
+En esta etapa, utilizaremos la librería plotly para generar gráficos interactivos que nos permitan inspeccionar a través de los datos. 
+
+```{python}
+import plotly.express as px
+import plotly.graph_objects as go
+
+template_design = "plotly_white"
+```
+
+## Análisis de Parciales
+
+¿Cómo se distribuye la carrera de un nadador a través de sus parciales?
+
+A continuación, vamos a seleccionar un 400m FREE de la nadadora Katie Ledecky, y vamos a graficar sus parciales a lo largo de la prueba. 
+
+```{python}
+import numpy as np
+
+# 1. Configuración de la búsqueda
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_disciplina = "400m FREE"
+
+# 2. Filtrado del DataFrame
+df_swimmer = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains("400m FREE")) # Flexible por si es FREESTYLE o FREE
+]
+
+# Verificamos que existan datos
+if df_swimmer.empty:
+    print(f"No se encontraron datos para {target_nombre} {target_apellido} en {target_disciplina}.")
+else:
+    # 3. Selección Aleatoria de Competición
+    ids_competiciones = df_swimmer['id_competicion'].unique()
+    
+    # Seleccionamos uno aleatoriamente
+    id_random = np.random.choice(ids_competiciones)
+
+    df_carrera = df_swimmer[df_swimmer['id_competicion'] == id_random].copy()
+    
+    if 'FHT' in df_carrera['ronda'].values:
+        df_carrera = df_carrera[df_carrera['ronda'] == 'FHT']
+    else:
+        # Si no hay final, cogemos la primera ronda disponible (ej. PRE)
+        ronda_disp = df_carrera['ronda'].iloc[0]
+        df_carrera = df_carrera[df_carrera['ronda'] == ronda_disp]
+    
+    df_carrera = df_carrera.sort_values('distancia_parcial')
+
+    # 4. Cálculo del Tiempo del Parcial (Split)
+    df_carrera['tiempo_parcial_calculado'] = df_carrera['tiempo_acumulado_seg'].diff().fillna(df_carrera['tiempo_acumulado_seg'])
+
+    # Datos para el título
+    
+
+    print(f"Graficando: {target_nombre} {target_apellido} | {target_disciplina}")
+    print(f"Competición ID: {id_random}")
+
+    # 5. Graficar
+    fig_parciales = px.line(
+        df_carrera, 
+        x='distancia_parcial', 
+        y='tiempo_parcial_calculado', 
+        markers=True,
+        text=df_carrera['tiempo_parcial_calculado'].round(2), # Mostrar valor en el punto
+        title=f"Ritmo de Carrera (Splits): {target_nombre} {target_apellido}<br><sup>{target_disciplina}</sup>",
+        labels={
+            'distancia_parcial': 'Distancia (m)', 
+            'tiempo_parcial_calculado': 'Tiempo de Vuelta (s)'
+        },
+        template="plotly_white"
+    )
+    
+    # Ajuste para que las etiquetas se lean bien
+    fig_parciales.update_traces(textposition="top center")
+    # Ajustar eje Y para que no empiece necesariamente en 0 y se vea mejor la variación del ritmo
+    fig_parciales.update_yaxes(rangemode="tozero") 
+    
+    fig_parciales.show()
+```
+
+Observamos que gracias a la propulsión del trampolín, es capaz de nadar el primer 50 muy rápido y luego se estabiliza en parciales cercanos a 30. 
+
+## Evolución temporal de rendimiento
+
+Vamos a analizar cómo ha evolucionado el rendimiento de Katie Ledecky a lo largo del tiempo para la prueba de 800m FREE. 
+
+```{python}
+import plotly.express as px
+import pandas as pd
+
+
+target_nombre = "Katie"
+target_apellido = "LEDECKY"
+target_prueba = "800m FREE" 
+
+
+df_evolucion = resultados_atletas[
+    (resultados_atletas['NOMBRE'] == target_nombre) &
+    (resultados_atletas['APELLIDOS'].str.contains(target_apellido, case=False)) &
+    (resultados_atletas['disciplina'].str.contains(target_prueba, case=False))
+].copy()
+
+
+df_evolucion = df_evolucion.drop_duplicates(subset=['id_competicion', 'ronda'])
+
+
+if 'nombre' not in df_evolucion.columns:
+    df_evolucion = pd.merge(df_evolucion, df_competiciones[['ID', 'nombre', 'ciudad']], 
+                            left_on='id_competicion', right_on='ID', how='left')
+
+
+df_evolucion = df_evolucion.sort_values('fecha_hora')
+
+print(f"Registros para graficar: {len(df_evolucion)}")
+
+
+fig_evol = px.line(
+    df_evolucion,
+    x='fecha_hora',       
+    y='tiempo_final_seg', 
+    markers=True,         
+    text=df_evolucion['ronda'].str[0], 
+    hover_name='nombre',  
+    hover_data={
+        'fecha_hora': '|%Y-%m-%d', 
+        'tiempo_final_seg': False, 
+        'tiempo_final': True,      
+        'ronda': True,             
+        'ciudad': True
+    },
+    title=f"Evolución de Rendimiento: {target_nombre} {target_apellido} - {target_prueba}",
+    template="plotly_white"
+)
+
+fig_evol.update_traces(
+    line=dict(color='#1f77b4', width=3), 
+    marker=dict(size=8, symbol='circle'), 
+    textposition="top center" 
+)
+
+fig_evol.update_layout(
+    xaxis_title="Fecha",
+    yaxis_title="Tiempo (segundos)",
+    yaxis=dict(autorange="reversed") 
+)
+
+fig_evol.show()
+```
+
+## Participación por Clubes en Competiciones Clave. 
+
+Visualizamos la representación de los clubes o países en una competición específica para entender el evento: 
+
+```{python}
+target_comp_id = 1  
+df_participacion = representacion_clubes_competicion[
+    representacion_clubes_competicion['id_competicion'] == target_comp_id
+].copy()
+
+df_top10 = df_participacion.sort_values('atletas_distintos', ascending=False).head(10)
+
+nombre_competicion = df_top10['nombre'].iloc[0]
+anio_competicion = df_top10['anio'].iloc[0]
+
+print(f"Graficando Top 10 para: {nombre_competicion} ({anio_competicion})")
+
+# 4. Graficar
+fig_part = px.bar(
+    df_top10,
+    x='club_name',       # Eje X: Nombre del Club/País
+    y='atletas_distintos', # Eje Y: Cantidad de nadadores
+    text_auto=True,      # Muestra el número encima de la barra automáticamente
+    color='atletas_distintos', # Colorea según la cantidad (opcional, queda bonito)
+    title=f"Top 10 Participación: {nombre_competicion}",
+    labels={
+        'club_name': 'Club / País',
+        'atletas_distintos': 'Nº Atletas'
+    },
+    template="plotly_white"
+)
+
+# Ajustes de diseño
+fig_part.update_layout(
+    xaxis_tickangle=-45, # Inclina los nombres si son muy largos
+    showlegend=False      # Ocultamos la leyenda porque el color ya da la info
+)
+
+fig_part.show()
+```
+
+## Preguntas directas sobre los datos
+
+### ¿Qué nadador ha tenido la mayor mejora porcentual promedio?
+
+```{python}
+print(f"\nTop 1 nadador con mayor % de mejora promedio:")
+display(df_atletas.sort_values('promedio_mejora_global', ascending=False).head(1))
+```
+
+### ¿Cuáles son la prueba más rápida del ciclo (menor tiempo registrado)?
+
+```{python}
+idx_min = resultados_atletas['tiempo_final_seg'].idxmin()
+registro_record = resultados_atletas.loc[idx_min]
+tiempo_str = registro_record['tiempo_final'] # Para mostrarlo bonito (texto)
+
+# 4. Imprimir resultado
+print(f"El tiempo final más bajo ({tiempo_str}) se realizó en la prueba {registro_record['disciplina']}")
+```
+
+### ¿Qué nadador ha competido más veces durante el ciclo? ¿Y menos?
+
+```{python}
+
+participacion_atletas = resultados_atletas.groupby(['id_atleta', 'NOMBRE', 'APELLIDOS'])['id_competicion'].nunique().reset_index()
+participacion_atletas.rename(columns={'id_competicion': 'num_competiciones'}, inplace=True)
+
+max_comps = participacion_atletas['num_competiciones'].max()
+min_comps = participacion_atletas['num_competiciones'].min()
+
+nadadores_max = participacion_atletas[participacion_atletas['num_competiciones'] == max_comps]
+nadadores_min_count = len(participacion_atletas[participacion_atletas['num_competiciones'] == min_comps])
+
+print(f"--- Análisis de Asistencia ---")
+
+print(f"El récord de asistencia es de {max_comps} competiciones.")
+print("Nadador(es) con más participaciones:")
+for index, row in nadadores_max.iterrows():
+    print(f"- {row['NOMBRE']} {row['APELLIDOS']}")
+
+print("-" * 30)
+print(f"El mínimo de asistencia es de {min_comps} competición.")
+print(f"Hay {nadadores_min_count} nadadores que solo han acudido a una única competición registrada en el ciclo.")
+```
+
 
 # Conclusiones
-- Hallazgos principales
-- Insights relevates
-- Posibles extensiones del estudio
+
+Tras la ejecución del flujo ETL y el análisis exploratorio, exraemos las siguientes conclusiones: 
+
+1. **Calidad de los datos**: Se ha logrado homogeneizar distintas competiciones. La conversión de tiempos a segundos y el procesamiento de tipos para fechas permiten ahora operaciones precisas sobre el rendimiento de los nadadores. 
+2. **Métricas de valor**: La métrica de "Porcentaje de Mejora Global" revela cómo ha influido el ciclo olímpico en todos y cada uno de los nadadores. 
+3. **Estrategias de la prueba**: A través de las visualizaciones de parciales, se puede observar cómo desarrolla un nadador una determinada prueba, logrando así que se puedan observar posibles planteamientos de la prueba nadada. 
+
+La limpieza de datos ha expuesto inconsistencias que inicialmente no se conocían, como la nomenclatura de clubes, lo que justica la necesidad de la tabla df_clubes normalizada. 
+El análisis de asistencia muestra cómo la mayor parte de los nadadores sólo compiten en una sóla prueba, debido a que estamos unificando pruebas como mundiales, junto con nacionales o tomas de tiempo que tienen un nivel de entrada más flexible. 
+
+Algunas **extensiones a futuro** de este trabajo pueden ser: 
+
+1. **Machine Learning**: Para predecir tiempos finales de un nadador o carreras enteras. También usable para clasificar a través de herramientas de aprendizaje no supervisado a tipos de nadadores en función de las pruebas que nadan, los tiempos que realizan o la forma de plantear sus pruebas. 
+
+2. **Dashboarding**: Conectar todos los dataframes creados para hacer una página web en la que cualquier nadador/club pueda consultar sus tiempos en cuestión de segundos gracias a la eficiencia de hacer joins entre las distintas tablas maestras. 
 
 # Carga de Datos
-- Exportación y guardado de resultados 
